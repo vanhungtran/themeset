@@ -42,6 +42,9 @@ reference:
   - apply_journal
   - compare_journals
   - journal_check
+  - journal_fix
+  - match_style
+  - journal_audit
   - save_journal_figure
   - journal_colors
   - journal_ramp
