@@ -240,7 +240,7 @@ ggplot(taxa, aes(condition, abundance, color = taxon, group = taxon)) +
 
 ## 6. Theme Sets and Markdown
 
-Markdown is not limited to the `md_theme_*()` functions. 34 of the 39 theme
+Markdown is not limited to the `md_theme_*()` functions. 44 of the 49 theme
 sets are built from markdown-enabled themes, so `apply_theme_set()` renders
 markup in titles, legends and facet strips as well. The five exceptions are
 `nyt`, `midnight`, `royal`, `deepblue` and `solid`; they show the markup

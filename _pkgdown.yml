@@ -30,6 +30,7 @@ reference:
 - title: Color scales
   desc: Discrete color and fill scales
   contents:
+  - color_scale_sets
   - theme_color_scales
   - list_color_scales
 

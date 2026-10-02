@@ -10,6 +10,7 @@
 #'
 #' @param ... Additional arguments passed to the underlying scale function.
 #' @return A `ggplot2` scale object.
+#' @seealso [scale_color_set()] and [scale_fill_set()] to pick any palette by name.
 #' @name theme_color_scales
 NULL
 

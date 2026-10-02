@@ -6,10 +6,11 @@
 `themeset` is an R package for reusable plot templates and color scales.
 It provides:
 
-- complete theme sets that combine a theme with matching color and fill
-  scales
+- 49 theme sets, 14 of which bring matching color and fill scales, among
+  them journal sets such as `nejm` and `lancet`
 - markdown-aware `ggplot2` theme wrappers
-- standalone color scale helpers that can be added directly to plots
+- discrete color scales that can be added directly to plots or picked by
+  name, from ggsci and from optional palette packages
 - a few custom themes for publication and presentation work
 
 ## Installation
@@ -59,6 +60,19 @@ ggplot(example_taxa(), aes(taxon, abundance, fill = condition)) +
 `example_growth()` and `example_taxa()` are small simulated data sets
 that come with the package.
 
+## Sets and palettes
+
+``` r
+apply_theme_set(p, "nejm")   # the classic theme with the NEJM palette
+list_theme_sets()            # the names of the 49 sets
+list_color_scales()          # the names of the palettes, by package
+
+# any palette by name, with any theme
+ggplot(example_taxa(), aes(taxon, abundance, fill = condition)) +
+  geom_boxplot() +
+  scale_fill_set("lancet")
+```
+
 ## A figure for a paper
 
 A figure for a paper is a grid of panels that share one look. The
@@ -69,9 +83,9 @@ data, and restyles the whole figure by changing the name of the set.
 
 <figure>
 <img src="man/figures/multi-panel.png"
-alt="Seven panels in the classic set: four time courses and three dot plots, with a shared legend." />
-<figcaption aria-hidden="true">Seven panels in the classic set: four
-time courses and three dot plots, with a shared legend.</figcaption>
+alt="Seven panels in the npg set: four time courses and three dot plots, with a shared legend." />
+<figcaption aria-hidden="true">Seven panels in the npg set: four time
+courses and three dot plots, with a shared legend.</figcaption>
 </figure>
 
 ## Documentation
@@ -92,3 +106,18 @@ Tutorials and the function reference are on the package website,
 
 The same articles, with their figures, are in the repository as
 Markdown, for reading on GitHub: [articles/](articles/).
+
+## Credits
+
+`themeset` does not contain the themes and palettes that it offers. It
+calls the packages below by name, and the work is theirs: ggplot2,
+ggthemes (Jeffrey B. Arnold), hrbrthemes (Bob Rudis), tvthemes (Ryo
+Nakagawara), cowplot (Claus O. Wilke), OlinkAnalyze (Olink), ggsci (Nan
+Xiao), flexoki (Christopher T. Kenny, for the Flexoki color scheme of
+Steph Ango), ggtext (Claus O. Wilke and Brenton M. Wiernik) and, when
+they are installed, wesanderson (Karthik Ram and Hadley Wickham),
+biopalette (Yibin Zhou) and ggpalettes (Yaoxiang Li). The journal sets
+use palettes that are named after journals; `themeset` is not affiliated
+with any journal. The [sources and
+credits](https://vanhungtran.github.io/themeset/articles/theme-sets-and-scales.html#sources-and-credits)
+section of the article on theme sets and color scales has the details.

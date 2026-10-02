@@ -58,7 +58,7 @@ set_global_theme("avatar")
 ``` r
 points <- ggplot(subset(taxa, taxon == "Bacteroides"),
                  aes(condition, abundance, color = condition)) +
-  geom_jitter(width = 0.1, size = 2) +
+  geom_point(position = position_jitter(width = 0.1, height = 0, seed = 1), size = 2) +
   labs(x = NULL, y = "Relative abundance (%)", color = NULL)
 
 bars <- ggplot(taxa, aes(taxon, abundance, fill = condition)) +
@@ -90,7 +90,8 @@ the colors of the set, the six strains do not:
 ``` r
 three <- ggplot(subset(taxa, taxon == "Bacteroides"),
                 aes(condition, abundance, color = condition)) +
-  geom_jitter(width = 0.1, size = 2, show.legend = FALSE) +
+  geom_point(position = position_jitter(width = 0.1, height = 0, seed = 1),
+             size = 2, show.legend = FALSE) +
   labs(title = "3 groups", x = NULL, y = "Relative abundance (%)")
 
 six <- ggplot(od, aes(time, value, color = strain)) +
@@ -210,6 +211,26 @@ cowplot::plot_grid(
 These four themes are ordinary ggplot2 themes, so everything that works
 with `theme_gray()` works with them, including adding `theme()` calls
 afterwards to adjust single elements.
+
+The dark themes also set the default color of points, lines, bars and
+text to a light one. A layer without a color mapping therefore shows on
+the dark panel instead of drawing black on dark (this needs ggplot2 4.0
+or later; older versions draw such layers black):
+
+``` r
+plain <- ggplot(subset(od, strain == "Strain A"), aes(time, value)) +
+  geom_line() +
+  geom_point(size = 2) +
+  labs(x = "Incubation time (hr)", y = "OD600")
+
+cowplot::plot_grid(
+  plain + ggtitle("theme_midnight()") + theme_midnight(),
+  plain + ggtitle("theme_deepblue()") + theme_deepblue(),
+  ncol = 2
+)
+```
+
+![](global-and-custom-themes_files/figure-gfm/dark_geoms-1.png)<!-- -->
 
 ------------------------------------------------------------------------
 

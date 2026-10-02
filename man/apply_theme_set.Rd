@@ -28,4 +28,7 @@ p <- ggplot(od, aes(x = time, y = value, color = strain)) +
   geom_point()
 
 apply_theme_set(p, "simpsons")
+
+# A journal set: the classic theme with the NEJM palette
+apply_theme_set(p, "nejm")
 }

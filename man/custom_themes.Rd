@@ -32,3 +32,9 @@ A \code{ggplot2} theme object.
 Custom themes included with the package that can be added directly to a
 \code{ggplot2} plot.
 }
+\details{
+\code{theme_midnight()}, \code{theme_royal()} and \code{theme_deepblue()} are dark themes.
+With ggplot2 4.0 or later they also set the default color of points, lines,
+bars and text to a light one, so a layer without a color mapping, such as
+\code{geom_point()}, is visible on the dark panel.
+}

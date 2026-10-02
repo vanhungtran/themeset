@@ -34,16 +34,23 @@ library(themeset)
 ## Overview
 
 A **theme set** is a ggplot2 theme bundled with the discrete color and fill
-scales that go with it. `themeset` ships 39 of them under short names such as
-`"simpsons"`, `"fivethirtyeight"` or `"minimal"`, and a few functions to apply a
-set to one plot or to every plot in your session.
+scales that go with it. `themeset` ships 49 of them under short names such as
+`"simpsons"`, `"nejm"` or `"minimal"`, and a few functions to apply a set to one
+plot or to every plot in your session.
 
-Four sets carry their own scales: `simpsons`, `avatar`, `olink` and
-`fivethirtyeight`. The other 35 change only the theme.
+Fourteen sets carry their own scales:
+
+- `simpsons`, `avatar`, `olink` and `fivethirtyeight`
+- eight journal sets, `npg`, `aaas`, `nejm`, `lancet`, `jama`, `jco`, `bmj` and
+  `frontiers`, which pair the classic theme with a journal palette
+- `flexoki_light` and `flexoki_dark`
+
+The other 35 change only the theme.
 
 The pieces are also exported on their own, so you can mix and match:
 
-- discrete color and fill scales (`scale_color_npg()`, `scale_fill_jama()`, ...)
+- discrete color and fill scales (`scale_color_npg()`, `scale_fill_jama()`, ...),
+  and any palette by name with `scale_color_set("nejm")`
 - markdown-enabled versions of the base ggplot2 themes (`md_theme_minimal()`, ...)
 - a few custom themes (`theme_nyt()`, `theme_midnight()`, ...)
 
@@ -73,9 +80,10 @@ head(example_taxa(), 3)
 | **Theme sets** | `apply_theme_set()` | Add a set's theme, color scale and fill scale to one plot |
 | | `set_global_theme()` | Make a set the default for every plot in the session |
 | | `reset_global_theme()` | Go back to ggplot2's default theme and palettes |
-| | `list_theme_sets()` | Print the names of the 39 available sets |
+| | `list_theme_sets()` | Print the names of the 49 available sets |
 | **Color scales** | `scale_color_npg()`, `scale_fill_npg()` | Discrete scales; also `jama`, `avatar`, `simpsons`, `olink` and `fivethirtyeight` |
-| | `list_color_scales()` | Print the names of the scale families |
+| | `scale_color_set()`, `scale_fill_set()` | Discrete scales picked by name, for example `"nejm"` or `"wesanderson::Darjeeling1"` |
+| | `list_color_scales()` | Print the names of the color scale sets |
 | **Themes** | `md_theme_minimal()` and seven more | Markdown-enabled versions of the base ggplot2 themes |
 | | `theme_nyt()` | Minimal theme with dashed gridlines and bold titles |
 | | `theme_midnight()`, `theme_royal()`, `theme_deepblue()` | Dark themes |
@@ -110,6 +118,13 @@ Change the name to change the whole look:
 apply_theme_set(p, "avatar")
 ```
 
+A journal set pairs the classic theme, which suits a paper, with the palette of
+a journal:
+
+```{r quick_journal}
+apply_theme_set(p, "nejm")
+```
+
 An unknown name is an error that points back to the list of sets:
 
 ```r
@@ -125,7 +140,7 @@ apply_theme_set(p, "nope")
 list_theme_sets()
 ```
 
-The first four are the complete sets. Every other name selects a theme only.
+The first fourteen are the complete sets. Every other name selects a theme only.
 The [Theme Sets and Color Scales](theme-sets-and-scales.html) article shows
 what they look like and which package each one comes from.
 

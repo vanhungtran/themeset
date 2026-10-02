@@ -40,14 +40,18 @@ taxa <- example_taxa()
 color scale and a discrete fill scale. This article looks at each of them,
 using the simulated data of `example_growth()` and `example_taxa()`:
 
-1. the four **complete sets**, which bring their own scales,
-2. the **color and fill scales** you can also use on their own,
+1. the 14 **complete sets**, which bring their own scales,
+2. the **color and fill scales**, which you can also use on their own and pick
+   by name,
 3. the 35 **theme-only sets**, and where each one comes from,
-4. how to **adjust** a set after applying it.
+4. how to **adjust** a set after applying it,
+5. the **sources and credits** of everything that `themeset` reaches.
 
 ---
 
-## 1. The Four Complete Sets
+## 1. The Complete Sets
+
+### TV and House Sets
 
 `simpsons`, `avatar`, `olink` and `fivethirtyeight` are complete: applying one
 changes the theme and also sets the colors of the `color` and `fill`
@@ -71,44 +75,126 @@ The scales behind these sets are exported as `scale_color_simpsons()`,
 `scale_color_avatar()`, `scale_color_olink()` and
 `scale_color_fivethirtyeight()`, with matching `scale_fill_*()` versions.
 
+### Journal Sets
+
+The journal sets pair the `classic` theme, with its white background, L-shaped
+axes and no grid, with a palette that is named after a journal: `npg`, `aaas`,
+`nejm`, `lancet`, `jama`, `jco`, `bmj` and `frontiers`. The palettes come from
+the ggsci package. They take their inspiration from the journals, and
+`themeset` is not affiliated with any of them. Each panel draws the six strains
+of the growth experiment:
+
+```{r journal_sets, fig.width = 8, fig.height = 7}
+strain_lines <- ggplot(growth, aes(time, value, color = strain)) +
+  geom_line() +
+  geom_point(size = 1.2) +
+  labs(x = NULL, y = NULL, color = NULL)
+
+journal <- c("npg", "aaas", "nejm", "lancet", "jama", "jco", "bmj", "frontiers")
+panels <- lapply(journal, function(s) {
+  apply_theme_set(strain_lines, s) + ggtitle(s) + theme(legend.position = "none")
+})
+cowplot::plot_grid(plotlist = panels, ncol = 2)
+```
+
+### Flexoki
+
+`flexoki_light` and `flexoki_dark` use the
+[Flexoki](https://stephango.com/flexoki) color scheme by Steph Ango, through
+the flexoki package: warm paper and ink colors that are meant for reading. The
+light set takes the deep accent tones, which read well on paper, and the dark
+set the paler ones, which read well on a dark screen. The dark set also draws
+the default geoms in a light color (see the dark sets below).
+
+```{r flexoki, fig.width = 8, fig.height = 3.4}
+flexoki <- lapply(c("flexoki_light", "flexoki_dark"), function(s) {
+  apply_theme_set(strain_lines, s) + ggtitle(s) + theme(legend.position = "none")
+})
+cowplot::plot_grid(plotlist = flexoki, ncol = 2)
+```
+
 ---
 
 ## 2. Color and Fill Scales
 
-There are six scale families. Each has a `scale_color_*()` and a
-`scale_fill_*()` function:
+The scales of the sets are available on their own. `scale_color_set()` and
+`scale_fill_set()` pick a palette by name, and `list_color_scales()` prints the
+names, grouped by the package that the palettes come from:
 
-| Family | Colors | Palette from |
-|--------|--------|--------------|
-| `npg` | 10 | ggsci |
-| `jama` | 7 | ggsci |
-| `avatar` | 8 | tvthemes |
-| `simpsons` | 10 | tvthemes |
-| `olink` | no fixed limit | OlinkAnalyze |
-| `fivethirtyeight` | 3 | ggthemes |
-
-`olink` interpolates between its base colors, so it can serve any number of
-levels. The figure shows the first 12 colors of every family, in the order
-ggplot2 hands them to the levels of a factor:
-
-```{r palettes, fig.width = 7, fig.height = 3.2}
-families <- c("npg", "jama", "avatar", "simpsons", "olink", "fivethirtyeight")
-
-swatches <- do.call(rbind, lapply(families, function(f) {
-  cols <- suppressWarnings(match.fun(paste0("scale_color_", f))()$palette(12))
-  cols <- cols[!is.na(cols)]
-  data.frame(family = f, position = seq_along(cols), color = cols)
-}))
-swatches$family <- factor(swatches$family, levels = rev(families))
-
-ggplot(swatches, aes(position, family, fill = color)) +
-  geom_tile(color = "white", linewidth = 0.8) +
-  scale_fill_identity() +
-  scale_x_continuous(breaks = 1:12, expand = c(0, 0)) +
-  labs(x = "Position in the palette", y = NULL) +
-  theme_minimal() +
-  theme(panel.grid = element_blank())
+```{r list_scales}
+list_color_scales()
 ```
+
+| Package | Names | Colors |
+|---------|-------|--------|
+| ggsci | 24 palettes, among them `npg`, `aaas`, `nejm`, `lancet`, `jama`, `jco`, `bmj`, `d3`, `igv`, `futurama` and `startrek` | 6 to 79, most of them 7 to 12 |
+| tvthemes | `avatar`, `simpsons` | 8 and 10 |
+| OlinkAnalyze | `olink` | no fixed limit |
+| ggthemes | `fivethirtyeight` | 3 |
+| flexoki | `flexoki_light`, `flexoki_dark` | 8, then they repeat |
+| wesanderson, biopalette, ggpalettes | `package::palette` | see below |
+
+The oldest scales also have a function of their own: `scale_color_npg()` and
+`scale_color_set("npg")` are the same scale. `olink` interpolates between its
+base colors, so it can serve any number of levels, while the two flexoki sets
+repeat their eight colors. The figure shows the first 12 colors of fourteen of
+the sets, in the order ggplot2 hands them to the levels of a factor:
+
+```{r palettes, fig.width = 7.5, fig.height = 5}
+# The largest number of colors, up to n, that a set can give
+palette_colors <- function(set, n = 12) {
+  scale <- scale_color_set(set)
+  for (k in n:1) {
+    colors <- tryCatch(suppressWarnings(scale$palette(k)), error = function(e) NULL)
+    if (!is.null(colors) && !anyNA(colors)) return(colors)
+  }
+}
+
+swatch_plot <- function(sets) {
+  swatches <- do.call(rbind, lapply(sets, function(set) {
+    colors <- palette_colors(set)
+    data.frame(set = set, position = seq_along(colors), color = colors)
+  }))
+  swatches$set <- factor(swatches$set, levels = rev(sets))
+
+  ggplot(swatches, aes(position, set, fill = color)) +
+    geom_tile(color = "white", linewidth = 0.8) +
+    scale_fill_identity() +
+    scale_x_continuous(breaks = 1:12, expand = c(0, 0)) +
+    labs(x = "Position in the palette", y = NULL) +
+    theme_minimal() +
+    theme(panel.grid = element_blank())
+}
+
+swatch_plot(c("npg", "aaas", "nejm", "lancet", "jama", "jco", "bmj", "d3", "avatar",
+              "simpsons", "olink", "fivethirtyeight", "flexoki_light", "flexoki_dark"))
+```
+
+### Optional Palettes
+
+Three more packages are suggested, not required: wesanderson, biopalette and
+ggpalettes. When one of them is installed, its palettes appear in
+`list_color_scales()` as `package::palette` and work like any other name. The
+qualitative palettes of biopalette are meant for biomedical figures, and the
+categorical palettes of ggpalettes interpolate, so they serve many levels:
+
+```{r optional_palettes, eval = all(vapply(c("wesanderson", "biopalette", "ggpalettes"), requireNamespace, logical(1), quietly = TRUE)), fig.width = 7.5, fig.height = 3.2}
+swatch_plot(c("wesanderson::Darjeeling1", "wesanderson::Zissou1",
+              "biopalette::cancer_mosaic", "biopalette::tam_pastel",
+              "ggpalettes::clinical", "ggpalettes::meadow"))
+```
+
+```{r optional_use, eval = requireNamespace("biopalette", quietly = TRUE), fig.width = 6.5, fig.height = 3.6}
+ggplot(taxa, aes(taxon, abundance, fill = condition)) +
+  stat_summary(fun = mean, geom = "col", position = position_dodge()) +
+  labs(x = NULL, y = "Mean relative abundance (%)", fill = NULL) +
+  guides(x = guide_axis(angle = 40)) +
+  theme_minimal() +
+  scale_fill_set("biopalette::tam_pastel")
+```
+
+A palette of a package that is not installed is an error that says which
+package to install.
 
 ### Using a Scale With Any Theme
 
@@ -134,7 +220,7 @@ cowplot::plot_grid(lines, bars, ncol = 2)
 
 ### Palette Size
 
-A family with a fixed number of colors cannot color more levels than it has.
+A palette with a fixed number of colors cannot color more levels than it has.
 `fivethirtyeight` has three, so the six strains of the growth experiment leave
 three of them without a color. ggplot2 warns, and the lines and points of those
 strains are dropped:
@@ -147,8 +233,9 @@ ggplot(growth, aes(time, value, color = strain)) +
   scale_color_fivethirtyeight()
 ```
 
-For data with many groups choose a larger family such as `npg`, `simpsons` or
-`olink`.
+For data with many groups choose a larger palette such as `npg`, `simpsons` or
+`olink`. The palettes of wesanderson are fixed vectors of colors, so with too
+many levels they stop with an error instead.
 
 ---
 
@@ -167,7 +254,8 @@ come from other packages; `themeset` wraps each one so that
 | themeset | `nyt`, `midnight`, `royal`, `deepblue` |
 
 (`fivethirtyeight` is also a ggthemes theme; it is one of the complete sets
-above because it ships with its colors.)
+above because it ships with its colors, and `classic` is the theme of the
+journal sets.)
 
 A selection of twelve, on the same growth curves:
 
@@ -186,14 +274,19 @@ tiles <- lapply(gallery_sets, function(s) {
 cowplot::plot_grid(plotlist = tiles, ncol = 3)
 ```
 
-Two practical notes:
+A few practical notes:
 
 - `ipsum` and `ipsum_rc` ask for the fonts "Arial Narrow" and "Roboto
   Condensed". If a font is not installed R falls back to its default family and
   the plot still draws.
-- 34 of the 39 sets render markdown in their titles, legends and facet labels.
+- 44 of the 49 sets render markdown in their titles, legends and facet labels.
   The exceptions are `nyt`, `midnight`, `royal`, `deepblue` and `solid`. See
   [Markdown-Enabled Themes](markdown-themes.html).
+- The dark sets, `midnight`, `royal`, `deepblue` and `flexoki_dark`, also set
+  the default color of points, lines and text to a light one, so that a layer
+  without a color mapping, such as `geom_point()`, shows on the dark panel. This
+  needs ggplot2 4.0 or later; with an older version the dark sets draw those
+  layers black.
 
 ---
 
@@ -211,12 +304,42 @@ p <- ggplot(growth, aes(time, value, color = strain)) +
   labs(x = "Incubation time (hr)", y = "OD600", color = NULL)
 
 apply_theme_set(p, "fivethirtyeight") +
-  scale_color_npg() +
+  scale_color_set("lancet") +
   theme(legend.position = "top")
 ```
 
 This keeps the look of the `fivethirtyeight` set but swaps its three-color
-palette, too small for six strains, for `npg`, which has ten colors.
+palette, too small for six strains, for `lancet`, which has nine colors.
+
+---
+
+## 5. Sources and Credits
+
+`themeset` does not contain the themes and palettes that it offers: it calls
+the packages below by name, and the work is theirs. Please credit them when you
+use their sets.
+
+| Package | What `themeset` reaches in it | Authors |
+|---------|-------------------------------|---------|
+| ggplot2 | the themes `bw`, `classic`, `dark`, `light`, `linedraw`, `minimal` | the ggplot2 authors |
+| ggsci | the palettes of the journal sets, and 16 more | Nan Xiao and contributors |
+| ggthemes | most theme-only sets, and `fivethirtyeight` | Jeffrey B. Arnold and contributors |
+| hrbrthemes | `ipsum`, `ipsum_rc` | Bob Rudis and contributors |
+| tvthemes | `simpsons`, `avatar` | Ryo Nakagawara |
+| cowplot | `cowplot`, `minimal_grid` | Claus O. Wilke |
+| OlinkAnalyze | `olink` | Olink and the authors of OlinkAnalyze |
+| flexoki | `flexoki_light`, `flexoki_dark` | Christopher T. Kenny; the Flexoki color scheme is by Steph Ango |
+| ggtext | markdown in titles, labels and legends | Claus O. Wilke and Brenton M. Wiernik |
+| wesanderson (optional) | `wesanderson::` palettes | Karthik Ram and Hadley Wickham |
+| biopalette (optional) | `biopalette::` palettes | Yibin Zhou |
+| ggpalettes (optional) | `ggpalettes::` palettes | Yaoxiang Li |
+
+Two ideas come from packages that `themeset` does not use. The names of the
+form `package::palette` follow paletteer by Emil Hvitfeldt, which reaches many
+palette collections that way. The ggdark package by Neal Grantham showed that a
+dark theme has to change the default color of the geoms too; `themeset` does
+that with the theme element that ggplot2 4.0 provides for it, and shares no code
+with ggdark.
 
 ---
 
@@ -224,7 +347,8 @@ palette, too small for six strains, for `npg`, which has ten colors.
 
 | To get | Use |
 |--------|-----|
-| A theme with matching colors | `apply_theme_set(p, "simpsons")`, `"avatar"`, `"olink"` or `"fivethirtyeight"` |
-| Only a palette | `scale_color_*()` and `scale_fill_*()` |
+| A theme with matching colors | `apply_theme_set(p, "<complete set>")`, for example `"simpsons"`, `"nejm"` or `"flexoki_dark"` |
+| Only a palette | `scale_color_set("<name>")` and `scale_fill_set("<name>")`, or `scale_color_*()` |
+| The names of the palettes | `list_color_scales()` |
 | Only a look | `apply_theme_set(p, "<theme-only set>")`, or call the theme directly |
 | A set's look with another palette | Add a `scale_*()` after `apply_theme_set()` |

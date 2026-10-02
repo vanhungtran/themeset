@@ -23,14 +23,11 @@
 #'   geom_point()
 #'
 #' apply_theme_set(p, "simpsons")
+#'
+#' # A journal set: the classic theme with the NEJM palette
+#' apply_theme_set(p, "nejm")
 apply_theme_set <- function(plot, set) {
-  theme_set_list <- get_theme_set_list()
-
-  if (!set %in% names(theme_set_list)) {
-    stop("Set '", set, "' not found. Run list_theme_sets() for available options.", call. = FALSE)
-  }
-
-  selected_set <- theme_set_list[[set]]
+  selected_set <- build_theme_set(set)
 
   plot <- plot + selected_set$theme
 
@@ -67,13 +64,7 @@ apply_theme_set <- function(plot, set) {
 #' reset_global_theme()
 #' }
 set_global_theme <- function(set) {
-  theme_set_list <- get_theme_set_list()
-
-  if (!set %in% names(theme_set_list)) {
-    stop("Set '", set, "' not found. Run list_theme_sets() for available options.", call. = FALSE)
-  }
-
-  selected_set <- theme_set_list[[set]]
+  selected_set <- build_theme_set(set)
 
   # 1. Set the plot theme globally
   ggplot2::theme_set(selected_set$theme)
@@ -114,118 +105,15 @@ reset_global_theme <- function() {
 #' List Available Theme Sets
 #'
 #' Prints the names of the theme sets available to use with `apply_theme_set`.
+#' The sets that bring their own color and fill scales come first; the others
+#' change only the theme.
 #'
 #' @return A character vector of available theme set names.
+#' @seealso [list_color_scales()] for the color scales
 #' @export
 list_theme_sets <- function() {
-  theme_set_list <- get_theme_set_list()
-  theme_sets <- names(theme_set_list)
+  theme_sets <- names(theme_set_builders())
   cat("Available theme sets:\n")
   print(theme_sets)
   invisible(theme_sets)
-}
-
-#' List Available Color Scale Sets
-#'
-#' Prints the names of the exported discrete color and fill scale sets.
-#'
-#' @return A character vector of available scale set names.
-#' @export
-list_color_scales <- function() {
-  color_scales <- names(get_color_scale_list())
-  cat("Available color scale sets:\n")
-  print(color_scales)
-  invisible(color_scales)
-}
-
-# Internal function to build and return the list of theme sets.
-get_theme_set_list <- function() {
-  list(
-    # Sets with themes and matching scales
-    simpsons = list(
-      theme = md_theme_simpsons(),
-      scale_color = scale_color_simpsons(),
-      scale_fill = scale_fill_simpsons()
-    ),
-    avatar = list(
-      theme = md_theme_avatar(),
-      scale_color = scale_color_avatar(),
-      scale_fill = scale_fill_avatar()
-    ),
-    olink = list(
-      theme = md_theme_olink(),
-      scale_color = scale_color_olink(),
-      scale_fill = scale_fill_olink()
-    ),
-    fivethirtyeight = list(
-      theme = md_theme_fivethirtyeight(),
-      scale_color = scale_color_fivethirtyeight(),
-      scale_fill = scale_fill_fivethirtyeight()
-    ),
-    # Theme-only sets
-    nyt = list(theme = theme_nyt()),
-    midnight = list(theme = theme_midnight()),
-    royal = list(theme = theme_royal()),
-    deepblue = list(theme = theme_deepblue()),
-    bw = list(theme = md_theme_bw()),
-    classic = list(theme = md_theme_classic()),
-    dark = list(theme = md_theme_dark()),
-    light = list(theme = md_theme_light()),
-    linedraw = list(theme = md_theme_linedraw()),
-    minimal = list(theme = md_theme_minimal()),
-    base = list(theme = md_theme_base()),
-    calc = list(theme = md_theme_calc()),
-    clean = list(theme = md_theme_clean()),
-    economist = list(theme = md_theme_economist()),
-    economist_white = list(theme = md_theme_economist_white()),
-    excel = list(theme = md_theme_excel()),
-    excel_new = list(theme = md_theme_excel_new()),
-    few = list(theme = md_theme_few()),
-    foundation = list(theme = md_theme_foundation()),
-    gdocs = list(theme = md_theme_gdocs()),
-    hc = list(theme = md_theme_hc()),
-    igray = list(theme = md_theme_igray()),
-    map_gg = list(theme = md_theme_map_gg()),
-    pander = list(theme = md_theme_pander()),
-    par = list(theme = md_theme_par()),
-    solarized = list(theme = md_theme_solarized()),
-    solarized_2 = list(theme = md_theme_solarized_2()),
-    solid = list(theme = ggthemes::theme_solid()),
-    stata = list(theme = md_theme_stata()),
-    tufte = list(theme = md_theme_tufte()),
-    wsj = list(theme = md_theme_wsj()),
-    ipsum = list(theme = md_theme_ipsum()),
-    ipsum_rc = list(theme = md_theme_ipsum_rc()),
-    cowplot = list(theme = md_theme_cowplot()),
-    minimal_grid = list(theme = md_theme_minimal_grid())
-  )
-}
-
-get_color_scale_list <- function() {
-  list(
-    avatar = list(
-      color = scale_color_avatar,
-      fill = scale_fill_avatar
-    ),
-    fivethirtyeight = list(
-      color = scale_color_fivethirtyeight,
-      fill = scale_fill_fivethirtyeight
-    ),
-    jama = list(
-      color = scale_color_jama,
-      fill = scale_fill_jama
-    ),
-    npg = list(
-      color = scale_color_npg,
-      fill = scale_fill_npg
-    ),
-    olink = list(
-      color = scale_color_olink,
-      fill = scale_fill_olink
-    ),
-    simpsons = list(
-      color = scale_color_simpsons,
-      fill = scale_fill_simpsons
-    )
-  )
 }

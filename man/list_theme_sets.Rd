@@ -11,4 +11,9 @@ A character vector of available theme set names.
 }
 \description{
 Prints the names of the theme sets available to use with \code{apply_theme_set}.
+The sets that bring their own color and fill scales come first; the others
+change only the theme.
+}
+\seealso{
+\code{\link[=list_color_scales]{list_color_scales()}} for the color scales
 }

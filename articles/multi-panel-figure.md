@@ -166,14 +166,14 @@ figure <- function(set, width = 7.2, text = NULL, color = NULL, fill = NULL) {
 
 ## 3. A Figure for Print
 
-`classic` is a theme-only set: white background, L-shaped axes, no grid.
-It brings no scales, so pass a palette. `text = 7` sets the text size,
-and `width` is the width of the canvas in inches: 7.2 in is 183 mm, the
+`npg` is a journal set: the `classic` theme, with its white background,
+L-shaped axes and no grid, together with the NPG palette of ggsci. It
+brings both the theme and the scales. `text = 7` sets the text size, and
+`width` is the width of the canvas in inches: 7.2 in is 183 mm, the
 double-column width of Nature journals.
 
 ``` r
-figure("classic", width = 7.2, text = 7,
-       color = scale_color_npg(), fill = scale_fill_npg())
+figure("npg", width = 7.2, text = 7)
 ```
 
 <img src="multi-panel-figure_files/figure-gfm/print-1.png" alt="A figure with seven panels: four line plots of growth measures over time, and three dot plots of taxon abundance, with a shared legend." width="100%" />
@@ -187,12 +187,17 @@ point is one sample and bars are medians._
 Click the figure to zoom. Axis tick labels are 0.8 times the text size,
 5.6 pt here; journals usually ask for 5 to 7 pt text at the final size.
 
+A theme-only set such as `classic` brings no scales, so you pass the
+palette yourself:
+`figure("classic", width = 7.2, text = 7, color = scale_color_npg(), fill = scale_fill_npg())`
+draws the same figure.
+
 ------------------------------------------------------------------------
 
 ## 4. The Same Figure with Other Sets
 
 Only the set changes. `olink` is a complete set: it brings its own theme
-and palette, and it follows the text size like `classic`:
+and palette, and it follows the text size like `npg`:
 
 ``` r
 figure("olink", width = 7.2, text = 7)
@@ -233,8 +238,7 @@ Save at the size you drew at. A vector PDF keeps the text sharp at any
 zoom and embeds the fonts; the PNG is for previews and slides.
 
 ``` r
-fig <- figure("classic", width = 7.2, text = 7,
-              color = scale_color_npg(), fill = scale_fill_npg())
+fig <- figure("npg", width = 7.2, text = 7)
 
 ggsave("figure.pdf", fig, width = 183, height = 114, units = "mm",
        device = cairo_pdf)
@@ -264,10 +268,10 @@ ggsave("figure.png", fig, width = 183, height = 114, units = "mm", dpi = 600)
   Themes](global-and-custom-themes.md).
 
 - **Text size.** `text = 7` sets the root text size of the theme. Sets
-  built on relative sizes follow it: `classic`, `bw`, `minimal`, `few`,
-  `tufte` and `olink`. Sets with fixed point sizes mostly ignore it
-  (`simpsons`, `avatar`), and a few follow it in part (`cowplot`,
-  `midnight`). Draw those on a larger canvas.
+  built on relative sizes follow it: `classic`, the journal sets, `bw`,
+  `minimal`, `few`, `tufte` and `olink`. Sets with fixed point sizes
+  mostly ignore it (`simpsons`, `avatar`), and a few follow it in part
+  (`cowplot`, `midnight`). Draw those on a larger canvas.
 
 - **Palette size.** `figure()` takes six colors from the palette, one
   for each level of `strain`, and then turns the last one grey.

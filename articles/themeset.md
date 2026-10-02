@@ -20,18 +20,25 @@ library(themeset)
 ## Overview
 
 A **theme set** is a ggplot2 theme bundled with the discrete color and
-fill scales that go with it. `themeset` ships 39 of them under short
-names such as `"simpsons"`, `"fivethirtyeight"` or `"minimal"`, and a
-few functions to apply a set to one plot or to every plot in your
-session.
+fill scales that go with it. `themeset` ships 49 of them under short
+names such as `"simpsons"`, `"nejm"` or `"minimal"`, and a few functions
+to apply a set to one plot or to every plot in your session.
 
-Four sets carry their own scales: `simpsons`, `avatar`, `olink` and
-`fivethirtyeight`. The other 35 change only the theme.
+Fourteen sets carry their own scales:
+
+- `simpsons`, `avatar`, `olink` and `fivethirtyeight`
+- eight journal sets, `npg`, `aaas`, `nejm`, `lancet`, `jama`, `jco`,
+  `bmj` and `frontiers`, which pair the classic theme with a journal
+  palette
+- `flexoki_light` and `flexoki_dark`
+
+The other 35 change only the theme.
 
 The pieces are also exported on their own, so you can mix and match:
 
 - discrete color and fill scales (`scale_color_npg()`,
-  `scale_fill_jama()`, …)
+  `scale_fill_jama()`, …), and any palette by name with
+  `scale_color_set("nejm")`
 - markdown-enabled versions of the base ggplot2 themes
   (`md_theme_minimal()`, …)
 - a few custom themes (`theme_nyt()`, `theme_midnight()`, …)
@@ -70,9 +77,10 @@ head(example_taxa(), 3)
 | **Theme sets** | `apply_theme_set()` | Add a set’s theme, color scale and fill scale to one plot |
 |  | `set_global_theme()` | Make a set the default for every plot in the session |
 |  | `reset_global_theme()` | Go back to ggplot2’s default theme and palettes |
-|  | `list_theme_sets()` | Print the names of the 39 available sets |
+|  | `list_theme_sets()` | Print the names of the 49 available sets |
 | **Color scales** | `scale_color_npg()`, `scale_fill_npg()` | Discrete scales; also `jama`, `avatar`, `simpsons`, `olink` and `fivethirtyeight` |
-|  | `list_color_scales()` | Print the names of the scale families |
+|  | `scale_color_set()`, `scale_fill_set()` | Discrete scales picked by name, for example `"nejm"` or `"wesanderson::Darjeeling1"` |
+|  | `list_color_scales()` | Print the names of the color scale sets |
 | **Themes** | `md_theme_minimal()` and seven more | Markdown-enabled versions of the base ggplot2 themes |
 |  | `theme_nyt()` | Minimal theme with dashed gridlines and bold titles |
 |  | `theme_midnight()`, `theme_royal()`, `theme_deepblue()` | Dark themes |
@@ -112,6 +120,15 @@ apply_theme_set(p, "avatar")
 
 ![](themeset_files/figure-gfm/quick_other-1.png)<!-- -->
 
+A journal set pairs the classic theme, which suits a paper, with the
+palette of a journal:
+
+``` r
+apply_theme_set(p, "nejm")
+```
+
+![](themeset_files/figure-gfm/quick_journal-1.png)<!-- -->
+
 An unknown name is an error that points back to the list of sets:
 
 ``` r
@@ -127,28 +144,47 @@ apply_theme_set(p, "nope")
 list_theme_sets()
 #> Available theme sets:
 #>  [1] "simpsons"        "avatar"          "olink"           "fivethirtyeight"
-#>  [5] "nyt"             "midnight"        "royal"           "deepblue"       
-#>  [9] "bw"              "classic"         "dark"            "light"          
-#> [13] "linedraw"        "minimal"         "base"            "calc"           
-#> [17] "clean"           "economist"       "economist_white" "excel"          
-#> [21] "excel_new"       "few"             "foundation"      "gdocs"          
-#> [25] "hc"              "igray"           "map_gg"          "pander"         
-#> [29] "par"             "solarized"       "solarized_2"     "solid"          
-#> [33] "stata"           "tufte"           "wsj"             "ipsum"          
-#> [37] "ipsum_rc"        "cowplot"         "minimal_grid"
+#>  [5] "npg"             "aaas"            "nejm"            "lancet"         
+#>  [9] "jama"            "jco"             "bmj"             "frontiers"      
+#> [13] "flexoki_light"   "flexoki_dark"    "nyt"             "midnight"       
+#> [17] "royal"           "deepblue"        "bw"              "classic"        
+#> [21] "dark"            "light"           "linedraw"        "minimal"        
+#> [25] "base"            "calc"            "clean"           "economist"      
+#> [29] "economist_white" "excel"           "excel_new"       "few"            
+#> [33] "foundation"      "gdocs"           "hc"              "igray"          
+#> [37] "map_gg"          "pander"          "par"             "solarized"      
+#> [41] "solarized_2"     "solid"           "stata"           "tufte"          
+#> [45] "wsj"             "ipsum"           "ipsum_rc"        "cowplot"        
+#> [49] "minimal_grid"
 ```
 
-The first four are the complete sets. Every other name selects a theme
-only. The [Theme Sets and Color Scales](theme-sets-and-scales.md)
-article shows what they look like and which package each one comes from.
+The first fourteen are the complete sets. Every other name selects a
+theme only. The [Theme Sets and Color
+Scales](theme-sets-and-scales.md) article shows what they look like
+and which package each one comes from.
 
 The color scales can be listed too:
 
 ``` r
 list_color_scales()
 #> Available color scale sets:
-#> [1] "avatar"          "fivethirtyeight" "jama"            "npg"            
-#> [5] "olink"           "simpsons"
+#> tvthemes: avatar, simpsons
+#> OlinkAnalyze: olink
+#> ggthemes: fivethirtyeight
+#> ggsci: aaas, atlassian, bmj, cosmic, d3, flatui, frontiers, futurama, gephi,
+#>     igv, iterm, jama, jco, lancet, locuszoom, nejm, npg, observable, primer,
+#>     rickandmorty, startrek, tron, uchicago, ucscgb
+#> flexoki: flexoki_light, flexoki_dark
+#> wesanderson (use as wesanderson::<name>): BottleRocket1, BottleRocket2,
+#>     Rushmore1, Rushmore, Royal1, Royal2, Zissou1, Darjeeling1, Darjeeling2,
+#>     Chevalier1, FantasticFox1, Moonrise1, Moonrise2, Moonrise3, Cavalcanti1,
+#>     GrandBudapest1, GrandBudapest2, IsleofDogs1, IsleofDogs2, FrenchDispatch,
+#>     AsteroidCity1, AsteroidCity2, AsteroidCity3
+#> biopalette (use as biopalette::<name>): gene_red, heat_light, three_body,
+#>     lactate_steps, walter_white2, tam_pastel, bcell_atlas, cancer_mosaic,
+#>     bcell_clusters, babel
+#> ggpalettes (use as ggpalettes::<name>): meadow, atelier, clinical, spectrum,
+#>     pastel, earth, midnight, floral, coastal, harvest
 ```
 
 ------------------------------------------------------------------------

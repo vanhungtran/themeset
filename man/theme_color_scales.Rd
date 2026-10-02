@@ -50,3 +50,6 @@ A \code{ggplot2} scale object.
 Convenience wrappers around palette scales from supporting packages. These
 functions can be added directly to a \code{ggplot2} object.
 }
+\seealso{
+\code{\link[=scale_color_set]{scale_color_set()}} and \code{\link[=scale_fill_set]{scale_fill_set()}} to pick any palette by name.
+}
