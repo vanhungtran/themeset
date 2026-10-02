@@ -130,6 +130,14 @@ journals, read in October 2026: read the current guide before you submit. The
 [article on journal figures](https://vanhungtran.github.io/themeset/articles/journal-figures.html)
 has the details and the sources.
 
+## More kinds of figures
+
+The [gallery](https://vanhungtran.github.io/themeset/articles/figure-gallery.html)
+draws a circular network, a circos plot, a four-panel figure and a grouped dot
+plot from simulated data, with the palettes and the journal themes of
+`themeset`. The packages that draw the first three (ggraph, circlize and
+patchwork) are suggested, not required.
+
 ## Documentation
 
 Tutorials and the function reference are on the package website,
@@ -141,6 +149,7 @@ Tutorials and the function reference are on the package website,
 - [Global and Custom Themes](https://vanhungtran.github.io/themeset/articles/global-and-custom-themes.html)
 - [A Multi-Panel Figure](https://vanhungtran.github.io/themeset/articles/multi-panel-figure.html)
 - [Comparing Figures Across Journals](https://vanhungtran.github.io/themeset/articles/journal-figures.html)
+- [A Gallery of Figure Types](https://vanhungtran.github.io/themeset/articles/figure-gallery.html)
 
 The same articles, with their figures, are in the repository as Markdown, for
 reading on GitHub: [articles/](articles/).
@@ -158,7 +167,9 @@ figures also use farver (Thomas Lin Pedersen, Berendea Nicolae and Romain
 François), the Okabe-Ito palette of Masataka Okabe and Kei Ito, which base R
 provides, and, when it is installed, colorspace (Ross Ihaka, Paul Murrell, Kurt
 Hornik, Jason C. Fisher, Reto Stauffer, Claus O. Wilke, Claire D. McWhite and
-Achim Zeileis). The journal sets
+Achim Zeileis). The gallery draws with igraph (Gábor Csárdi, Tamás Nepusz and
+others), ggraph and patchwork (Thomas Lin Pedersen) and circlize (Zuguang Gu),
+which are suggested as well. The journal sets
 use palettes that are named after journals; `themeset` is not affiliated with
 any journal. The
 [sources and credits](https://vanhungtran.github.io/themeset/articles/theme-sets-and-scales.html#sources-and-credits)

@@ -60,8 +60,9 @@ This vignette is a short tour. The other articles go deeper:
 [Theme Sets and Color Scales](theme-sets-and-scales.html),
 [Markdown-Enabled Themes](markdown-themes.html),
 [Global and Custom Themes](global-and-custom-themes.html),
-[A Multi-Panel Figure](multi-panel-figure.html) and
-[Comparing Figures Across Journals](journal-figures.html).
+[A Multi-Panel Figure](multi-panel-figure.html),
+[Comparing Figures Across Journals](journal-figures.html) and
+[A Gallery of Figure Types](figure-gallery.html).
 
 ### Example Data
 

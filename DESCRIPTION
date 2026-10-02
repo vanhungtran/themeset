@@ -1,6 +1,6 @@
 Package: themeset
 Title: A Functional Approach to Applying 'ggplot2' Theme and Scale Sets
-Version: 1.7.0
+Version: 1.7.1
 Author: Lucas TRAN <tranhungydhcm@gmail.com>
 Maintainer: Lucas TRAN <tranhungydhcm@gmail.com>
 Description: Provides a simple, function-based interface for applying
@@ -28,8 +28,12 @@ Imports:
     OlinkAnalyze
 Suggests:
     biopalette,
+    circlize,
     colorspace,
     ggpalettes,
+    ggraph,
+    igraph,
+    patchwork,
     ragg,
     wesanderson,
     knitr,

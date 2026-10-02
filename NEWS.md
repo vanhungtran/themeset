@@ -1,3 +1,14 @@
+# themeset 1.7.1
+
+* A new article, "A Gallery of Figure Types", draws four kinds of figure from
+  simulated data and styles them with `themeset`: a circular network (ggraph), a
+  circos plot (circlize), a four-panel figure in the theme of a journal
+  (patchwork) and a grouped dot plot. The packages that draw them are suggested,
+  not required.
+* `save_journal_figure()` writes a PDF with the standard `pdf()` device where
+  R cannot load the cairo library, as on a macOS without XQuartz. Before, no file
+  was written there.
+
 # themeset 1.7.0
 
 ## Journal figures
