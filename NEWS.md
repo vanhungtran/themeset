@@ -1,3 +1,26 @@
+# themeset 1.8.0
+
+## Repairing figures
+
+* `journal_fix()` repairs what `journal_check()` finds, and checks the figure
+  again, until the checks pass or nothing more can be changed. Text that is
+  too small or too large gets the size of the limit, lines thinner than 0.25 pt
+  get 0.25 pt, panel tags get the case of the journal, and colors that are hard
+  to tell apart are replaced by the Okabe-Ito palette if, and only if, that
+  makes them easier to tell apart. The plot keeps its own style otherwise, and
+  the attribute `fixes` lists every change.
+
+## The figures of one paper
+
+* `match_style()` draws a plot in the style of a reference plot: its theme, and
+  its color for each group that the two plots share. New groups get a color of
+  the palette of the reference that no group of the reference uses.
+* `journal_audit()` checks a list of figures against a journal, and the figures
+  against each other: a group that has a different color in two figures, axis
+  text of different sizes, and different font families.
+* The article "Comparing Figures Across Journals" has two new sections, on
+  repairing a figure and on the figures of one paper.
+
 # themeset 1.7.2
 
 * The gallery has a fifth figure: a composite of nine panels in the theme of

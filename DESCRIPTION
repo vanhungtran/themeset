@@ -1,6 +1,6 @@
 Package: themeset
 Title: A Functional Approach to Applying 'ggplot2' Theme and Scale Sets
-Version: 1.7.2
+Version: 1.8.0
 Author: Lucas TRAN <tranhungydhcm@gmail.com>
 Maintainer: Lucas TRAN <tranhungydhcm@gmail.com>
 Description: Provides a simple, function-based interface for applying
@@ -9,7 +9,9 @@ Description: Provides a simple, function-based interface for applying
     Markdown-enabled wrappers for the base ggplot2 themes are also exported, and
     discrete color scales, among them journal palettes, can be chosen by name.
     The figure templates of scientific journals (sizes, text, panel tags and
-    colors) can be applied to plots and compared.
+    colors) can be applied to plots and compared, and a figure can be checked
+    and repaired for a journal. The figures of one paper can share one style
+    and be checked against each other.
 License: MIT + file LICENSE
 URL: https://github.com/vanhungtran/themeset, https://vanhungtran.github.io/themeset/
 BugReports: https://github.com/vanhungtran/themeset/issues

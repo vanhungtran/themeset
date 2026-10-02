@@ -125,6 +125,13 @@ templates come from the author guides of the journals, read in October
 figures](https://vanhungtran.github.io/themeset/articles/journal-figures.html)
 has the details and the sources.
 
+For the figures of one paper, `journal_fix()` repairs what
+`journal_check()` finds, with small changes, and checks again;
+`match_style()` gives a figure the theme of another and the same color
+for each group the two share; and `journal_audit()` checks all the
+figures for a journal and against each other, for example a strain that
+is blue in one figure and red in the next.
+
 ## More kinds of figures
 
 The
