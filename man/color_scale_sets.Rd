@@ -31,8 +31,10 @@ Most names are plain. They come from the packages that \code{themeset} imports:
 the discrete palettes of ggsci, among them the journal palettes \code{npg},
 \code{aaas}, \code{nejm}, \code{lancet}, \code{jama}, \code{jco} and \code{bmj}; \code{avatar} and \code{simpsons}
 from tvthemes; \code{olink} from OlinkAnalyze; \code{fivethirtyeight} from ggthemes;
-and \code{flexoki_light} and \code{flexoki_dark}, the accent colors of the Flexoki
-scheme for a light and for a dark background.
+\code{flexoki_light} and \code{flexoki_dark}, the accent colors of the Flexoki scheme
+for a light and for a dark background; and \code{okabe_ito}, the Okabe-Ito palette
+of base R, which readers with color-vision deficiency can tell apart (eight
+colors, seven and black).
 
 The palettes of three more packages are listed as \code{package::palette}, for
 example \code{"wesanderson::Darjeeling1"}, when the package is installed:
@@ -48,7 +50,9 @@ the flexoki sets repeat their eight colors.
 
 The palettes belong to their authors; \code{themeset} only reaches them by name.
 The names of the journal palettes tell where a palette took its inspiration.
-\code{themeset} is not affiliated with any journal.
+\code{themeset} is not affiliated with any journal. The Okabe-Ito palette is the
+work of Masataka Okabe and Kei Ito, and base R provides it in
+\code{\link[grDevices:palette.colors]{grDevices::palette.colors()}}.
 }
 
 \examples{

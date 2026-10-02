@@ -34,6 +34,20 @@ reference:
   - theme_color_scales
   - list_color_scales
 
+- title: Journal figures
+  desc: Templates of journals, to draw, compare and check a figure for each of them
+  contents:
+  - journal_templates
+  - journal_theme
+  - apply_journal
+  - compare_journals
+  - journal_check
+  - save_journal_figure
+  - journal_colors
+  - journal_ramp
+  - compare_palettes
+  - journal_tags
+
 - title: Themes
   desc: Markdown-enabled ggplot2 themes and the custom themes
   contents:
@@ -62,3 +76,4 @@ articles:
   - markdown-themes
   - global-and-custom-themes
   - multi-panel-figure
+  - journal-figures

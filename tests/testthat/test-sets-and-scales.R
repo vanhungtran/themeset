@@ -69,6 +69,13 @@ test_that("every ggsci palette of the list is a discrete scale", {
   }
 })
 
+test_that("okabe_ito is the palette of base R, with black last", {
+  base <- unname(grDevices::palette.colors(9, "Okabe-Ito"))
+  expect_equal(scale_color_set("okabe_ito")$palette(8), c(base[2:8], base[1]))
+  expect_s3_class(scale_fill_set("okabe_ito"), "ScaleDiscrete")
+  expect_equal(quiet(list_color_scales("grDevices")), "okabe_ito")
+})
+
 test_that("the two flexoki sets take the tones that suit their background", {
   expect_equal(
     scale_color_set("flexoki_light")$palette(4),

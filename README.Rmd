@@ -30,6 +30,9 @@ It provides:
 - markdown-aware `ggplot2` theme wrappers
 - discrete color scales that can be added directly to plots or picked by name,
   from ggsci and from optional palette packages
+- templates of 13 journals, with their figure widths, text sizes, panel tags and
+  palettes, to draw one figure for several journals, compare them and check the
+  result
 - a few custom themes for publication and presentation work
 
 ## Installation
@@ -97,6 +100,36 @@ and restyles the whole figure by changing the name of the set.
 
 ![Seven panels in the npg set: four time courses and three dot plots, with a shared legend.](man/figures/multi-panel.png)
 
+## Journal figures
+
+The same figure often has to fit more than one journal. `compare_journals()`
+draws a plot once for each journal, at the width of a column of that journal and
+in its theme and palette, side by side and to scale:
+
+```{r journals_build}
+p <- ggplot(od, aes(time, value, color = strain)) +
+  geom_errorbar(aes(ymin = value - se, ymax = value + se), width = 2) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Incubation time (hr)", y = "OD600", color = NULL)
+
+journals <- compare_journals(p, c("nature", "science", "cell"), sheet_mm = 250)
+journals_size <- attr(journals, "size_mm")
+```
+
+```{r journals, fig.width = journals_size[["width"]] / 25.4, fig.height = journals_size[["height"]] / 25.4, fig.alt = "The same line plot at the single-column width of Nature, Science and Cell Press journals, each in the theme and palette of its journal."}
+journals
+```
+
+`journal_check()` checks a figure against the limits of a journal (the text, the
+lines, the panel tags, the height and whether the colors can be told apart),
+`save_journal_figure()` saves it at the size of a column, and `compare_palettes()`
+tells which palettes keep their colors apart for readers with color-vision
+deficiency. The numbers of the templates come from the author guides of the
+journals, read in October 2026: read the current guide before you submit. The
+[article on journal figures](https://vanhungtran.github.io/themeset/articles/journal-figures.html)
+has the details and the sources.
+
 ## Documentation
 
 Tutorials and the function reference are on the package website,
@@ -107,6 +140,7 @@ Tutorials and the function reference are on the package website,
 - [Markdown-Enabled Themes](https://vanhungtran.github.io/themeset/articles/markdown-themes.html)
 - [Global and Custom Themes](https://vanhungtran.github.io/themeset/articles/global-and-custom-themes.html)
 - [A Multi-Panel Figure](https://vanhungtran.github.io/themeset/articles/multi-panel-figure.html)
+- [Comparing Figures Across Journals](https://vanhungtran.github.io/themeset/articles/journal-figures.html)
 
 The same articles, with their figures, are in the repository as Markdown, for
 reading on GitHub: [articles/](articles/).
@@ -119,7 +153,12 @@ Arnold), hrbrthemes (Bob Rudis), tvthemes (Ryo Nakagawara), cowplot (Claus O.
 Wilke), OlinkAnalyze (Olink), ggsci (Nan Xiao), flexoki (Christopher T. Kenny,
 for the Flexoki color scheme of Steph Ango), ggtext (Claus O. Wilke and Brenton
 M. Wiernik) and, when they are installed, wesanderson (Karthik Ram and Hadley
-Wickham), biopalette (Yibin Zhou) and ggpalettes (Yaoxiang Li). The journal sets
+Wickham), biopalette (Yibin Zhou) and ggpalettes (Yaoxiang Li). The journal
+figures also use farver (Thomas Lin Pedersen, Berendea Nicolae and Romain
+François), the Okabe-Ito palette of Masataka Okabe and Kei Ito, which base R
+provides, and, when it is installed, colorspace (Ross Ihaka, Paul Murrell, Kurt
+Hornik, Jason C. Fisher, Reto Stauffer, Claus O. Wilke, Claire D. McWhite and
+Achim Zeileis). The journal sets
 use palettes that are named after journals; `themeset` is not affiliated with
 any journal. The
 [sources and credits](https://vanhungtran.github.io/themeset/articles/theme-sets-and-scales.html#sources-and-credits)

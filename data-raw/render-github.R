@@ -25,7 +25,7 @@ options(OlinkAnalyze.allow.font.load = FALSE)
 pkgload::load_all(".", quiet = TRUE)
 
 articles <- c("themeset", "theme-sets-and-scales", "markdown-themes",
-              "global-and-custom-themes", "multi-panel-figure")
+              "global-and-custom-themes", "multi-panel-figure", "journal-figures")
 dir.create("articles", showWarnings = FALSE)
 
 # The files are committed, so write the same line endings on every system

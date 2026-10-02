@@ -42,12 +42,16 @@ The pieces are also exported on their own, so you can mix and match:
 - markdown-enabled versions of the base ggplot2 themes
   (`md_theme_minimal()`, …)
 - a few custom themes (`theme_nyt()`, `theme_midnight()`, …)
+- templates of journals, with their figure widths, text sizes, panel
+  tags and palettes, to compare one figure in several journals
+  (`compare_journals()`)
 
 This vignette is a short tour. The other articles go deeper: [Theme Sets
 and Color Scales](theme-sets-and-scales.md), [Markdown-Enabled
 Themes](markdown-themes.md), [Global and Custom
-Themes](global-and-custom-themes.md) and [A Multi-Panel
-Figure](multi-panel-figure.md).
+Themes](global-and-custom-themes.md), [A Multi-Panel
+Figure](multi-panel-figure.md) and [Comparing Figures Across
+Journals](journal-figures.md).
 
 ### Example Data
 
@@ -84,6 +88,12 @@ head(example_taxa(), 3)
 | **Themes** | `md_theme_minimal()` and seven more | Markdown-enabled versions of the base ggplot2 themes |
 |  | `theme_nyt()` | Minimal theme with dashed gridlines and bold titles |
 |  | `theme_midnight()`, `theme_royal()`, `theme_deepblue()` | Dark themes |
+| **Journal figures** | `journal_templates()` | The column widths, text sizes, panel tags and palettes of 13 journals |
+|  | `apply_journal()`, `journal_theme()` | Add the theme and the palette of a journal to a plot |
+|  | `compare_journals()` | Draw one figure in several journals, side by side and to scale |
+|  | `journal_check()` | Check a figure against the text and line limits of a journal |
+|  | `save_journal_figure()` | Save a figure at the width of a column of a journal |
+|  | `journal_colors()`, `journal_ramp()`, `compare_palettes()` | The colors of a journal, shades for ordered groups, and how well palettes keep colors apart |
 | **Example data** | `example_growth()`, `example_taxa()` | Simulated growth curves and taxon abundances |
 
 ------------------------------------------------------------------------
@@ -175,6 +185,7 @@ list_color_scales()
 #>     igv, iterm, jama, jco, lancet, locuszoom, nejm, npg, observable, primer,
 #>     rickandmorty, startrek, tron, uchicago, ucscgb
 #> flexoki: flexoki_light, flexoki_dark
+#> grDevices: okabe_ito
 #> wesanderson (use as wesanderson::<name>): BottleRocket1, BottleRocket2,
 #>     Rushmore1, Rushmore, Royal1, Royal2, Zissou1, Darjeeling1, Darjeeling2,
 #>     Chevalier1, FantasticFox1, Moonrise1, Moonrise2, Moonrise3, Cavalcanti1,

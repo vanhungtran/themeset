@@ -4,16 +4,22 @@
 # The markdown-enabling helper function. Not exported.
 
 # Text elements that are switched to markdown rendering: titles and captions,
-# axis titles, legends and facet strips. Children such as `axis.title.x` are
+# axis titles, legend titles and facet strips. Children such as `axis.title.x` are
 # listed because ggplot2 draws the child, so a markdown parent alone is not
 # enough. Axis tick labels (`axis.text*`) stay plain: they come from the data,
 # and labels such as "<LOD>" or "***" would fail to parse as markdown. Elements
 # that the theme rotates are skipped too (see as_md_theme()).
+#
+# Legend labels (`legend.text`) stay plain as well. ggtext measures the labels of
+# a continuous color bar in canvas-relative units, so with markdown legend text
+# the bar is as long as the canvas is high: it overflows a panel that is drawn
+# into a larger figure. Markdown labels in a discrete legend are an opt-in:
+# theme(legend.text = ggtext::element_markdown()).
 md_text_elements <- c(
   "plot.title", "plot.subtitle", "plot.caption",
   "axis.title", "axis.title.x", "axis.title.x.top", "axis.title.x.bottom",
   "axis.title.y", "axis.title.y.left", "axis.title.y.right",
-  "legend.title", "legend.text",
+  "legend.title",
   "strip.text", "strip.text.x", "strip.text.x.top", "strip.text.x.bottom",
   "strip.text.y", "strip.text.y.left", "strip.text.y.right"
 )
@@ -22,7 +28,7 @@ md_text_elements <- c(
 # in the list (it is plain `title` or `text`).
 md_root_elements <- c(
   "plot.title", "plot.subtitle", "plot.caption", "axis.title",
-  "legend.title", "legend.text", "strip.text"
+  "legend.title", "strip.text"
 )
 
 # Parent of each child element in ggplot2's element tree. Walking this small

@@ -64,6 +64,10 @@ builtin_color_scales <- function() {
   }
   entries$flexoki_light <- flexoki_scale("dark")
   entries$flexoki_dark <- flexoki_scale("light")
+  # Okabe-Ito comes with base R. It is safe for readers with color-vision deficiency,
+  # and Nature recommends it. The seven colors come first, black last.
+  okabe_ito <- unname(grDevices::palette.colors(9, "Okabe-Ito")[c(2:8, 1)])
+  entries$okabe_ito <- scale_entry("grDevices", function(aesthetic, ...) manual_scale(aesthetic, okabe_ito, ...))
   entries
 }
 
@@ -142,8 +146,10 @@ find_color_scale <- function(set) {
 #' the discrete palettes of ggsci, among them the journal palettes `npg`,
 #' `aaas`, `nejm`, `lancet`, `jama`, `jco` and `bmj`; `avatar` and `simpsons`
 #' from tvthemes; `olink` from OlinkAnalyze; `fivethirtyeight` from ggthemes;
-#' and `flexoki_light` and `flexoki_dark`, the accent colors of the Flexoki
-#' scheme for a light and for a dark background.
+#' `flexoki_light` and `flexoki_dark`, the accent colors of the Flexoki scheme
+#' for a light and for a dark background; and `okabe_ito`, the Okabe-Ito palette
+#' of base R, which readers with color-vision deficiency can tell apart (eight
+#' colors, seven and black).
 #'
 #' The palettes of three more packages are listed as `package::palette`, for
 #' example `"wesanderson::Darjeeling1"`, when the package is installed:
@@ -157,7 +163,9 @@ find_color_scale <- function(set) {
 #' @section Credits:
 #' The palettes belong to their authors; `themeset` only reaches them by name.
 #' The names of the journal palettes tell where a palette took its inspiration.
-#' `themeset` is not affiliated with any journal.
+#' `themeset` is not affiliated with any journal. The Okabe-Ito palette is the
+#' work of Masataka Okabe and Kei Ito, and base R provides it in
+#' [grDevices::palette.colors()].
 #'
 #' @param set The name of a color scale set. Run [list_color_scales()] for the
 #'   names.

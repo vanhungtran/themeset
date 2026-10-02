@@ -54,10 +54,10 @@ base ggplot2 themes with their text elements switched over to it:
 | `md_theme_classic()` | `theme_classic()` |
 
 The text elements that understand markdown are the plot title, subtitle and
-caption, the x axis title, the legend title and labels, and the facet strips
-above the panels. Tick labels and text that the theme rotates (the y axis title
-and the strips on the side of a facet grid) stay plain text; section 3 explains
-why and how to switch them on for a plot.
+caption, the x axis title, the legend title, and the facet strips above the
+panels. Tick labels, the labels of a legend, and text that the theme rotates
+(the y axis title and the strips on the side of a facet grid) stay plain text;
+sections 3 and 5 explain why and how to switch them on for a plot.
 
 Only the way the text is drawn changes. Sizes, alignment, margins and colors
 are those of the theme that is wrapped, and arguments are passed on, so
@@ -180,10 +180,11 @@ ggtext renders a limited set of markdown and HTML:
 
 ### Labels That Come From Your Data
 
-The legend labels and the facet labels are read as markdown as well, and they
-are usually values from your data. A level that looks like markup, such as
-`<LOD>` (below the limit of detection) or `*`, makes the plot fail. Escape the
-characters in the scale's `labels` with a backslash:
+The facet labels are read as markdown, and so are the legend labels once you
+switch them on (section 5). Both are usually values from your data. A level
+that looks like markup, such as `<LOD>` (below the limit of detection) or `*`,
+makes the plot fail. Escape the characters in the scale's `labels` with a
+backslash:
 
 ```{r escaped_labels, fig.width = 6, fig.height = 2.6}
 detection <- data.frame(
@@ -196,7 +197,8 @@ ggplot(detection, aes(time, value, color = level)) +
   geom_point(size = 3) +
   scale_color_discrete(labels = c("\\<LOD\\>", "low", "high")) +
   labs(x = "Incubation time (hr)", y = "Concentration", color = NULL) +
-  md_theme_minimal()
+  md_theme_minimal() +
+  theme(legend.text = ggtext::element_markdown())
 ```
 
 HTML entities work too (`&lt;LOD&gt;`). A theme without markdown, such as
@@ -224,8 +226,9 @@ ggplot(taxa, aes(taxon, abundance)) +
 
 ## 5. Italic Legend Labels
 
-Taxon names are conventionally set in italics. Labels given to a scale go
-through the same markdown handling as the rest of the text:
+Taxon names are conventionally set in italics. The title of the legend is
+markdown already; the labels of the legend are plain text by default, so switch
+the element on for the plot:
 
 ```{r legend_labels}
 ggplot(taxa, aes(condition, abundance, color = taxon, group = taxon)) +
@@ -233,8 +236,15 @@ ggplot(taxa, aes(condition, abundance, color = taxon, group = taxon)) +
   stat_summary(fun = mean, geom = "point", size = 2.5) +
   scale_color_jama(labels = paste0("*", levels(taxa$taxon), "*")) +
   labs(x = NULL, y = "Mean relative abundance (%)", color = "**Taxon**") +
-  md_theme_light()
+  md_theme_light() +
+  theme(legend.text = ggtext::element_markdown())
 ```
+
+The labels stay plain by default for a reason beyond the markup characters in
+data. ggtext measures the labels of a continuous color bar in units that
+depend on the size of the canvas, so with markdown legend labels the bar of a
+heatmap grows with the figure it is drawn into and can overflow its panel.
+Switch the labels on only for a plot with a discrete legend.
 
 ---
 
@@ -242,7 +252,7 @@ ggplot(taxa, aes(condition, abundance, color = taxon, group = taxon)) +
 
 Markdown is not limited to the `md_theme_*()` functions. 44 of the 49 theme
 sets are built from markdown-enabled themes, so `apply_theme_set()` renders
-markup in titles, legends and facet strips as well. The five exceptions are
+markup in titles, legend titles and facet strips as well. The five exceptions are
 `nyt`, `midnight`, `royal`, `deepblue` and `solid`; they show the markup
 characters literally:
 
@@ -273,6 +283,7 @@ cowplot::plot_grid(
 | Exponents and indices | `<sup>` and `<sub>` in a title, the x axis title or a strip label |
 | Markup in the y axis title | `theme(axis.title.y = ggtext::element_markdown())`, with ragg or at 192 dpi or more |
 | Markup in tick labels | `theme(axis.text.x.bottom = ggtext::element_markdown())`, or `axis.text.y.left` |
+| Markup in the labels of a discrete legend | `theme(legend.text = ggtext::element_markdown())` |
 | A label that looks like markup | Escape it: `"\\<LOD\\>"` |
 | A markdown-enabled base theme | `md_theme_gray()`, `md_theme_bw()`, ... |
 | Markdown in a theme set | any set except `nyt`, `midnight`, `royal`, `deepblue` and `solid` |

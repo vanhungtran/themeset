@@ -129,6 +129,7 @@ list_color_scales()
 #>     igv, iterm, jama, jco, lancet, locuszoom, nejm, npg, observable, primer,
 #>     rickandmorty, startrek, tron, uchicago, ucscgb
 #> flexoki: flexoki_light, flexoki_dark
+#> grDevices: okabe_ito
 #> wesanderson (use as wesanderson::<name>): BottleRocket1, BottleRocket2,
 #>     Rushmore1, Rushmore, Royal1, Royal2, Zissou1, Darjeeling1, Darjeeling2,
 #>     Chevalier1, FantasticFox1, Moonrise1, Moonrise2, Moonrise3, Cavalcanti1,
@@ -315,9 +316,10 @@ A few practical notes:
 - `ipsum` and `ipsum_rc` ask for the fonts “Arial Narrow” and “Roboto
   Condensed”. If a font is not installed R falls back to its default
   family and the plot still draws.
-- 44 of the 49 sets render markdown in their titles, legends and facet
-  labels. The exceptions are `nyt`, `midnight`, `royal`, `deepblue` and
-  `solid`. See [Markdown-Enabled Themes](markdown-themes.md).
+- 44 of the 49 sets render markdown in their titles, legend titles and
+  facet labels. The exceptions are `nyt`, `midnight`, `royal`,
+  `deepblue` and `solid`. See [Markdown-Enabled
+  Themes](markdown-themes.md).
 - The dark sets, `midnight`, `royal`, `deepblue` and `flexoki_dark`,
   also set the default color of points, lines and text to a light one,
   so that a layer without a color mapping, such as `geom_point()`, shows
@@ -368,7 +370,8 @@ them when you use their sets.
 | cowplot | `cowplot`, `minimal_grid` | Claus O. Wilke |
 | OlinkAnalyze | `olink` | Olink and the authors of OlinkAnalyze |
 | flexoki | `flexoki_light`, `flexoki_dark` | Christopher T. Kenny; the Flexoki color scheme is by Steph Ango |
-| ggtext | markdown in titles, labels and legends | Claus O. Wilke and Brenton M. Wiernik |
+| grDevices (base R) | the `okabe_ito` palette | R Core Team; the palette is by Masataka Okabe and Kei Ito |
+| ggtext | markdown in titles, axis titles, legend titles and facet strips | Claus O. Wilke and Brenton M. Wiernik |
 | wesanderson (optional) | `wesanderson::` palettes | Karthik Ram and Hadley Wickham |
 | biopalette (optional) | `biopalette::` palettes | Yibin Zhou |
 | ggpalettes (optional) | `ggpalettes::` palettes | Yaoxiang Li |

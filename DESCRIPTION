@@ -1,6 +1,6 @@
 Package: themeset
 Title: A Functional Approach to Applying 'ggplot2' Theme and Scale Sets
-Version: 1.6.0
+Version: 1.7.0
 Author: Lucas TRAN <tranhungydhcm@gmail.com>
 Maintainer: Lucas TRAN <tranhungydhcm@gmail.com>
 Description: Provides a simple, function-based interface for applying
@@ -8,6 +8,8 @@ Description: Provides a simple, function-based interface for applying
     for both local, per-plot application and global session-wide theme setting.
     Markdown-enabled wrappers for the base ggplot2 themes are also exported, and
     discrete color scales, among them journal palettes, can be chosen by name.
+    The figure templates of scientific journals (sizes, text, panel tags and
+    colors) can be applied to plots and compared.
 License: MIT + file LICENSE
 URL: https://github.com/vanhungtran/themeset, https://vanhungtran.github.io/themeset/
 BugReports: https://github.com/vanhungtran/themeset/issues
@@ -21,11 +23,14 @@ Imports:
     cowplot,
     tvthemes,
     ggsci,
+    farver,
     flexoki,
     OlinkAnalyze
 Suggests:
     biopalette,
+    colorspace,
     ggpalettes,
+    ragg,
     wesanderson,
     knitr,
     rmarkdown,

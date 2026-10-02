@@ -38,3 +38,12 @@ A markdown-enabled \code{{ggplot2}} theme object.
 A collection of standard \code{{ggplot2}} themes with markdown support enabled.
 These can be added to a plot using the \code{+} operator.
 }
+\details{
+The titles, captions, axis titles, legend titles and facet strips render
+markdown. The tick labels of the axes and the labels of the legends stay plain:
+they come from your data, and a label such as \verb{<LOD>} would be read as markup.
+Markdown legend labels would also make a continuous color bar as long as the
+canvas is high. To use markdown in the tick labels or in the labels of a
+discrete legend, switch the element on for that plot, for example
+\code{theme(legend.text = ggtext::element_markdown())}.
+}
