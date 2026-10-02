@@ -1,0 +1,143 @@
+<!-- themeset vignette layout: reading progress bar, back-to-top button and
+     click-to-zoom figures. Shared by every vignette through
+     `includes: before_body`. Self-contained: no external scripts or fonts. -->
+
+<style>
+/* Reading progress bar */
+#rpb {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0;
+  background: linear-gradient(90deg, #2c7da0, #61a5c2);
+  z-index: 20000; transition: width .12s linear;
+}
+
+/* Back to top */
+#btt {
+  position: fixed; bottom: 2em; right: 1.8em; width: 42px; height: 42px;
+  background: #2c7da0; color: #fff; border: none; border-radius: 50%;
+  font-size: 20px; line-height: 42px; text-align: center; cursor: pointer;
+  opacity: 0; pointer-events: none;
+  transition: opacity .28s, background .2s, transform .2s;
+  box-shadow: 0 3px 12px rgba(0,0,0,.28); z-index: 9000;
+}
+#btt.show { opacity: 1; pointer-events: auto; }
+#btt:hover { background: #61a5c2; transform: translateY(-3px); }
+
+/* Figures: zoom cursor and a small lift on hover */
+img.ts-zoom {
+  cursor: zoom-in;
+  transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .28s ease;
+}
+img.ts-zoom:hover {
+  transform: scale(1.015) translateY(-3px);
+  box-shadow: 0 12px 32px rgba(44,125,160,.28);
+}
+
+/* Full-size figure viewer */
+#ts-viewer {
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 30000;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(15, 23, 32, .9); cursor: zoom-out;
+}
+#ts-viewer.open { display: flex; }
+#ts-viewer img {
+  max-width: 94vw; max-height: 92vh; background: #fff;
+  border-radius: 4px; box-shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #rpb, #btt, img.ts-zoom { transition: none; }
+  img.ts-zoom:hover { transform: none; }
+}
+</style>
+
+<script>
+(function () {
+  function ready(fn) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn);
+    } else {
+      fn();
+    }
+  }
+
+  ready(function () {
+    var body = document.body;
+
+    /* Reading progress bar and back-to-top button */
+    var bar = document.createElement('div');
+    bar.id = 'rpb';
+    body.appendChild(bar);
+
+    var top = document.createElement('button');
+    top.id = 'btt';
+    top.type = 'button';
+    top.title = 'Back to top';
+    top.setAttribute('aria-label', 'Back to top');
+    top.textContent = String.fromCharCode(8593);  /* up arrow */
+    body.appendChild(top);
+
+    function onScroll() {
+      var s = document.documentElement;
+      var max = s.scrollHeight - s.clientHeight;
+      bar.style.width = (max > 0 ? Math.min(s.scrollTop / max * 100, 100) : 0) + '%';
+      top.classList.toggle('show', window.scrollY > 480);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    top.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    onScroll();
+
+    /* Click-to-zoom figures, with the arrow keys to move between them */
+    var viewer = document.createElement('div');
+    viewer.id = 'ts-viewer';
+    viewer.setAttribute('role', 'dialog');
+    viewer.setAttribute('aria-label', 'Figure viewer');
+    var big = document.createElement('img');
+    viewer.appendChild(big);
+    body.appendChild(viewer);
+
+    var figures = [];
+    var current = 0;
+
+    function candidates() {
+      return Array.prototype.filter.call(document.querySelectorAll('img'), function (img) {
+        if (img.closest('nav, header, footer, a, #ts-viewer')) return false;
+        return img.naturalWidth === 0 || img.naturalWidth >= 120;
+      });
+    }
+    function mark() {
+      candidates().forEach(function (img) { img.classList.add('ts-zoom'); });
+    }
+    function show(i) {
+      figures = candidates();
+      if (!figures.length) return;
+      current = (i + figures.length) % figures.length;
+      big.src = figures[current].currentSrc || figures[current].src;
+      big.alt = figures[current].alt || '';
+      viewer.classList.add('open');
+    }
+    function hide() {
+      viewer.classList.remove('open');
+    }
+
+    mark();
+    window.addEventListener('load', mark);
+    document.addEventListener('click', function (e) {
+      var img = e.target;
+      if (!img || img.tagName !== 'IMG' || !img.classList.contains('ts-zoom')) return;
+      var i = candidates().indexOf(img);
+      if (i < 0) return;
+      e.preventDefault();
+      show(i);
+    });
+    viewer.addEventListener('click', hide);
+    document.addEventListener('keydown', function (e) {
+      if (!viewer.classList.contains('open')) return;
+      if (e.key === 'Escape') hide();
+      else if (e.key === 'ArrowRight') show(current + 1);
+      else if (e.key === 'ArrowLeft') show(current - 1);
+    });
+  });
+})();
+</script>

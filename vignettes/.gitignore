@@ -1,0 +1,5 @@
+*.html
+!lightbox.html
+*.R
+*_cache/
+*_files/

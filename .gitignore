@@ -1,0 +1,26 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.Rdata
+.httr-oauth
+.DS_Store
+.quarto
+inst/doc
+Rplots.pdf
+
+# pkgdown site (built and published by CI) and vignette build output
+/docs/
+/doc/
+/Meta/
+
+# Kept local, not published: the FDA material (data, notebook, Shiny app,
+# deployment records and scraping script) and the static color tables
+/fda.csv
+/fda.xlsx
+/fda.html
+/fda.Rmd
+/shiapp/
+/rsconnect/
+/data-raw/extract_table_fda.R
+/vignettes/List_of_colors.Rmd

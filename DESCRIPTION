@@ -1,0 +1,38 @@
+Package: themeset
+Title: A Functional Approach to Applying 'ggplot2' Theme and Scale Sets
+Version: 1.5.0
+Author: Lucas TRAN <tranhungydhcm@gmail.com>
+Maintainer: Lucas TRAN <tranhungydhcm@gmail.com>
+Description: Provides a simple, function-based interface for applying
+    cohesive sets of 'ggplot2' themes and color scales. The package allows
+    for both local, per-plot application and global session-wide theme setting. 
+    Markdown-enabled wrappers for the base ggplot2 themes are also exported.
+License: MIT + file LICENSE
+URL: https://github.com/vanhungtran/themeset, https://vanhungtran.github.io/themeset/
+BugReports: https://github.com/vanhungtran/themeset/issues
+Encoding: UTF-8
+LazyData: true
+Imports:
+    ggplot2,
+    ggthemes,
+    ggtext,
+    hrbrthemes,
+    cowplot,
+    tvthemes,
+    ggsci,
+    OlinkAnalyze
+Suggests:
+    knitr,
+    rmarkdown,
+    extrafont,
+    scales,
+    testthat (>= 3.0.0),
+    BiocManager,
+    gh,
+    remotes
+Remotes:
+    Ryo-N7/tvthemes
+Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.1.0
+Config/testthat/edition: 3

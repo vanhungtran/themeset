@@ -1,0 +1,63 @@
+url: https://vanhungtran.github.io/themeset
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+  light-switch: true
+
+title: themeset
+
+navbar:
+  structure:
+    left:
+    - intro
+    - reference
+    - articles
+    right:
+    - search
+    - github
+    - lightswitch
+
+reference:
+- title: Theme sets
+  desc: Apply a complete theme and scale set to one plot, or to the whole session
+  contents:
+  - apply_theme_set
+  - set_global_theme
+  - reset_global_theme
+  - list_theme_sets
+
+- title: Color scales
+  desc: Discrete color and fill scales
+  contents:
+  - theme_color_scales
+  - list_color_scales
+
+- title: Themes
+  desc: Markdown-enabled ggplot2 themes and the custom themes
+  contents:
+  - ggplot2_md_themes
+  - custom_themes
+
+- title: Example data
+  desc: Small simulated data sets used by the examples and vignettes
+  contents:
+  - example_data
+
+- title: Helpers
+  contents:
+  - install_and_load
+
+articles:
+- title: Get Started
+  navbar: ~
+  contents:
+  - themeset
+
+- title: Tutorials
+  desc: Task-focused guides
+  contents:
+  - theme-sets-and-scales
+  - markdown-themes
+  - global-and-custom-themes
+  - multi-panel-figure
