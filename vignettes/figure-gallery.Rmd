@@ -32,17 +32,19 @@ options(OlinkAnalyze.allow.font.load = FALSE)
 library(ggplot2)
 library(themeset)
 
-# The packages of the first three figures are suggested, not required: without
-# one of them its chunk is shown but not run.
+# The packages of the figures are suggested, not required: without one of them
+# its chunk is shown but not run.
 has_network <- requireNamespace("igraph", quietly = TRUE) && requireNamespace("ggraph", quietly = TRUE)
 has_circos <- requireNamespace("circlize", quietly = TRUE)
 has_patchwork <- requireNamespace("patchwork", quietly = TRUE)
+has_composite <- has_patchwork && has_circos &&
+  requireNamespace("ComplexHeatmap", quietly = TRUE) && requireNamespace("ggridges", quietly = TRUE)
 ```
 
 ## Overview
 
 Not every figure is a plot of one variable against another. This article draws
-four kinds that papers and reports use often, and styles each of them with
+five kinds that papers and reports use often, and styles each of them with
 `themeset`:
 
 - a **circular network**, with [ggraph](https://ggraph.data-imaginist.com/)
@@ -51,10 +53,13 @@ four kinds that papers and reports use often, and styles each of them with
 - a **four-panel figure** for print, with
   [patchwork](https://patchwork.data-imaginist.com/)
 - a **grouped dot plot**, with ggplot2
+- a **composite figure** of nine panels, with heat maps and an oncoprint from
+  [ComplexHeatmap](https://jokergoo.github.io/ComplexHeatmap-reference/book/)
+  next to ggplot2 panels
 
 All the data are simulated, and the numbers in the figures mean nothing. The
-packages for the first three figures are only suggested by `themeset`; if one is
-not installed, the code of its figure is shown but not run.
+packages for the figures are only suggested by `themeset`; if one is not
+installed, the code of its figure is shown but not run.
 
 What `themeset` brings is the same in each: the palettes, by name with
 `scale_color_set()` or as colors with `journal_colors()`, the theme of a journal
@@ -337,7 +342,214 @@ ggplot(approval, aes(Net_Approval, Region)) +
 
 ---
 
-## 5. Packages and Credits
+## 5. A Composite Figure of Nine Panels
+
+The kind of figure that a paper on patient-derived models ends with: nine panels
+in five rows. Two are schematics, which are drawn in a vector editor, so only a
+placeholder keeps their place. The others are donut charts, two small heat maps,
+an oncoprint of mutations, a UMAP, a correlation heat map, ridgelines and a
+scatter plot with a fitted line.
+
+Some panels are ggplot2 plots and some are drawn by ComplexHeatmap with grid
+graphics. `patchwork::wrap_elements()` turns a grid graphic into a patch, so that
+patchwork lays out all nine and tags them. The figure is 183 mm wide, the double
+column of Nature, and 170 mm high, its maximum height. One palette, Okabe-Ito,
+colors every category, so that the figure keeps to the colors that the guide of
+Nature lists.
+
+```{r composite, eval = has_composite, fig.width = 183 / 25.4, fig.height = 170 / 25.4, fig.cap = "A composite figure of nine panels: two schematic placeholders, donut charts, two small heat maps, an oncoprint, a UMAP, a correlation heat map, ridgelines and a scatter plot.", fig.alt = "A figure of nine panels tagged a to i, in five rows. Panels a and h are dashed boxes that stand for schematics. Panel b has three donut charts. Panel c has two small heat maps. Panel d is an oncoprint of eight genes. Panel e is a scatter plot of four clusters. Panel f is a heat map of six lineages with colored strips on its top and left. Panel g has three ridgelines. Panel i is a scatter plot with a rising fitted line."}
+library(patchwork)
+library(ComplexHeatmap)
+library(ggridges)
+library(grid)
+
+set.seed(42)
+okabe_ito <- journal_colors("cell")
+nature_theme <- journal_theme("nature")
+text_pt <- 5.6   # the size of axis text in the theme of Nature; the heat maps use it too
+tag_style <- theme(plot.tag = element_text(size = 8, face = "bold"))
+
+lineages <- c("Colon", "Pancreas", "Ovary", "Breast", "Stomach", "Liver")
+lineage_colors <- setNames(okabe_ito[seq_along(lineages)], lineages)
+
+# a and h: placeholders for the schematics
+placeholder <- function(text) {
+  ggplot() +
+    annotate("rect", xmin = 0, xmax = 1, ymin = 0, ymax = 1, fill = "grey98",
+             colour = "grey70", linetype = "dashed", linewidth = 0.3) +
+    annotate("text", x = 0.5, y = 0.5, label = text, size = 2.5, fontface = "italic", colour = "grey30") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    theme_void(base_size = 7) +
+    tag_style
+}
+fig_a <- placeholder("Schematic of the experimental workflow\n(drawn in a vector editor)")
+fig_h <- placeholder("Schematic of differentiation over time\n(drawn in a vector editor)")
+
+# b: one donut chart for each kind of data, in one plot with three facets
+donuts <- data.frame(
+  data = factor(rep(c("WGS", "RNA-seq", "CRISPR"), each = 6), levels = c("WGS", "RNA-seq", "CRISPR"),
+                labels = c("WGS (n = 251)", "RNA-seq (n = 306)", "CRISPR (n = 147)")),
+  lineage = factor(rep(lineages, 3), levels = lineages),
+  n = c(35, 25, 18, 12, 6, 4,   30, 28, 20, 12, 6, 4,   40, 22, 16, 12, 6, 4)
+)
+donuts$fraction <- ave(donuts$n, donuts$data, FUN = function(n) n / sum(n))
+donuts$ymax <- ave(donuts$fraction, donuts$data, FUN = cumsum)
+donuts$ymin <- donuts$ymax - donuts$fraction
+
+fig_b <- ggplot(donuts) +
+  geom_rect(aes(ymax = ymax, ymin = ymin, xmax = 4, xmin = 2.4, fill = lineage), colour = "white", linewidth = 0.2) +
+  coord_polar(theta = "y") +
+  xlim(c(1, 4)) +
+  facet_wrap(vars(data)) +
+  scale_fill_manual(values = lineage_colors, name = NULL) +
+  theme_void(base_size = 7) +
+  theme(strip.text = element_text(size = text_pt, face = "bold"), legend.text = element_text(size = text_pt),
+        legend.key.size = unit(2.5, "mm"), panel.spacing = unit(0, "mm")) +
+  tag_style
+
+# c: two small heat maps side by side, drawn by ComplexHeatmap into one grid graphic
+diverging <- circlize::colorRamp2(c(-1, 0, 1), c(okabe_ito[5], "white", okabe_ito[6]))
+small_heatmap <- function(genes, title) {
+  values <- matrix(runif(16, -1, 1), nrow = 4,
+                   dimnames = list(genes, c("Tumor", "Organoid", "Spheroid", "Cell line")))
+  Heatmap(values, col = diverging, name = title, show_heatmap_legend = FALSE,
+          cluster_rows = FALSE, cluster_columns = FALSE,
+          column_title = title, column_title_gp = gpar(fontsize = 7, fontface = "bold"),
+          row_names_gp = gpar(fontsize = text_pt), column_names_gp = gpar(fontsize = text_pt),
+          column_names_rot = 45, rect_gp = gpar(col = "white", lwd = 0.5))
+}
+heatmaps <- grid.grabExpr({
+  pushViewport(viewport(layout = grid.layout(1, 2)))
+  pushViewport(viewport(layout.pos.col = 1))
+  draw(small_heatmap(c("TP53", "APC", "KRAS", "BRAF"), "Promoter c1"), newpage = FALSE)
+  popViewport()
+  pushViewport(viewport(layout.pos.col = 2))
+  draw(small_heatmap(c("SMAD4", "PIK3CA", "PTEN", "ERBB2"), "Promoter c2"), newpage = FALSE)
+  popViewport(2)
+})
+fig_c <- wrap_elements(full = heatmaps) + tag_style
+
+# d: an oncoprint of 8 genes in 30 samples, without the bar plots at its edges
+genes <- c("TP53", "KRAS", "APC", "SMAD4", "BRAF", "PIK3CA", "ARID1A", "PTEN")
+alterations <- matrix(
+  sample(c("", "MUT", "AMP", "DEL"), length(genes) * 30, replace = TRUE, prob = c(0.72, 0.15, 0.08, 0.05)),
+  nrow = length(genes), dimnames = list(genes, paste0("S", 1:30))
+)
+alteration_colors <- c(MUT = okabe_ito[3], AMP = okabe_ito[6], DEL = okabe_ito[5])
+alter_fun <- list(
+  background = function(x, y, w, h) grid.rect(x, y, w, h, gp = gpar(fill = "grey94", col = "white")),
+  MUT = function(x, y, w, h) grid.rect(x, y, w, h * 0.33, gp = gpar(fill = alteration_colors[["MUT"]], col = NA)),
+  AMP = function(x, y, w, h) grid.rect(x, y, w, h, gp = gpar(fill = alteration_colors[["AMP"]], col = NA)),
+  DEL = function(x, y, w, h) grid.rect(x, y, w, h, gp = gpar(fill = alteration_colors[["DEL"]], col = NA))
+)
+oncoprint <- oncoPrint(
+  alterations, alter_fun = alter_fun, col = alteration_colors, show_column_names = FALSE,
+  top_annotation = NULL, right_annotation = NULL,
+  row_names_gp = gpar(fontsize = text_pt), pct_gp = gpar(fontsize = text_pt),
+  # the labels of this legend can only be sized if `at` and `labels` are given too
+  heatmap_legend_param = list(title = "Alteration", nrow = 1,
+                              at = names(alteration_colors), labels = names(alteration_colors),
+                              title_gp = gpar(fontsize = text_pt, fontface = "bold"),
+                              labels_gp = gpar(fontsize = text_pt),
+                              grid_height = unit(2, "mm"), grid_width = unit(2, "mm"))
+)
+# the extra padding on the left keeps the tag of the panel off the percentages
+fig_d <- wrap_elements(full = grid.grabExpr(
+  draw(oncoprint, heatmap_legend_side = "bottom", padding = unit(c(1, 7, 1, 1), "mm"))
+)) + tag_style
+
+# e: a UMAP of four cell types
+umap <- data.frame(
+  UMAP_1 = c(rnorm(120, -2, 0.8), rnorm(120, 2, 0.7), rnorm(120, 0, 0.9), rnorm(120, 3, 0.6)),
+  UMAP_2 = c(rnorm(120, 2, 0.8), rnorm(120, 1, 0.7), rnorm(120, -2, 0.8), rnorm(120, -1, 0.7)),
+  Cell_type = rep(c("Epithelial", "Mesenchymal", "Endothelial", "Tumor-like"), each = 120)
+)
+fig_e <- ggplot(umap, aes(UMAP_1, UMAP_2, colour = Cell_type)) +
+  geom_point(alpha = 0.7, size = 0.6, stroke = 0) +
+  scale_colour_manual(values = okabe_ito[c(2, 3, 5, 6)]) +
+  guides(colour = guide_legend(override.aes = list(size = 1.5, alpha = 1))) +
+  labs(colour = NULL) +
+  nature_theme
+
+# f: a correlation heat map, with the lineage colors of panel b on its top and left
+correlation <- matrix(runif(36, 0.1, 0.95), nrow = 6, dimnames = list(lineages, lineages))
+correlation[lower.tri(correlation)] <- t(correlation)[lower.tri(correlation)]
+diag(correlation) <- 1
+lineage_strip <- function(which) {
+  HeatmapAnnotation(lineage = lineages, col = list(lineage = lineage_colors), which = which,
+                    show_legend = FALSE, show_annotation_name = FALSE, simple_anno_size = unit(1.6, "mm"))
+}
+correlation_map <- Heatmap(
+  correlation, name = "Correlation",
+  col = circlize::colorRamp2(c(0, 0.5, 1), journal_ramp("cell", 3, color = 5, light = 0.92)),
+  cluster_rows = FALSE, cluster_columns = FALSE,
+  top_annotation = lineage_strip("column"), left_annotation = lineage_strip("row"),
+  row_names_side = "right", row_names_gp = gpar(fontsize = text_pt), column_names_gp = gpar(fontsize = text_pt),
+  rect_gp = gpar(col = "white", lwd = 0.5),
+  heatmap_legend_param = list(title_gp = gpar(fontsize = text_pt, fontface = "bold"),
+                              labels_gp = gpar(fontsize = text_pt),
+                              grid_width = unit(2, "mm"), legend_height = unit(14, "mm"))
+)
+fig_f <- wrap_elements(full = grid.grabExpr(draw(correlation_map, padding = unit(c(1, 7, 1, 1), "mm")))) + tag_style
+
+# g: ridgelines
+effects <- data.frame(
+  Model = factor(rep(c("Cell lines", "Organoids", "Spheroids"), each = 400),
+                 levels = c("Spheroids", "Organoids", "Cell lines")),
+  Effect = c(rnorm(400, -0.6, 0.65), rnorm(400, -0.3, 0.5), rnorm(400, 0.1, 0.55))
+)
+fig_g <- ggplot(effects, aes(Effect, Model, fill = Model)) +
+  geom_density_ridges(alpha = 0.7, scale = 1.3, rel_min_height = 0.01, colour = "white", linewidth = 0.3) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey40", linewidth = 0.3) +
+  scale_fill_manual(values = c("Cell lines" = okabe_ito[5], Organoids = okabe_ito[2], Spheroids = okabe_ito[1])) +
+  labs(x = "Mean gene effect", y = NULL) +
+  nature_theme +
+  theme(legend.position = "none")
+
+# i: a scatter plot with a fitted line
+corrected <- data.frame(Raw = runif(80, 0, 10), Noise = rnorm(80, 0, 0.8))
+corrected$Corrected <- corrected$Raw * 0.82 + corrected$Noise + 0.5
+fig_i <- ggplot(corrected, aes(Raw, Corrected)) +
+  geom_point(colour = okabe_ito[5], alpha = 0.7, size = 0.8, stroke = 0) +
+  geom_smooth(method = "lm", formula = y ~ x, colour = okabe_ito[6], fill = "grey80", linewidth = 0.4) +
+  labs(x = "Raw effect", y = "Corrected effect") +
+  nature_theme
+
+fig_a / (fig_b | fig_c) / (fig_d | fig_e) / (fig_f | fig_g) / (fig_h | fig_i) +
+  plot_layout(heights = c(1.2, 0.9, 1.4, 1.1, 1.1)) +
+  plot_annotation(tag_levels = list(journal_tags("nature", 9)))
+```
+
+`journal_check()` reads the ggplot panels, and it is given the size of the figure.
+The heat maps and the oncoprint are grid graphics that it cannot read; their text
+is set to the same 5.6 pt by hand, with `text_pt`.
+
+```{r composite_check, eval = has_composite}
+journal_check(list(fig_b, fig_e, fig_g, fig_i), "nature", column = "double", height = 170)
+```
+
+- `wrap_elements(full = )` takes the grid graphic that `grid.grabExpr()` captures
+  from `draw()`. Patchwork tags it like a plot. The tags of the heat maps and of
+  the panels drawn with `theme_void()` come out larger and not bold, unless
+  `tag_style` (bold, 8 pt) is added to each of them; the panels with
+  `journal_theme()` have that style already.
+- The three donut charts are one ggplot with three facets: a single plot gets a
+  single tag and a shared legend. `coord_polar(theta = "y")` bends the bars of
+  `geom_rect()` into rings, and `xlim()` leaves the hole in the middle.
+- The colors of the lineages are one named vector, `lineage_colors`. Panel **b**
+  fills the rings with it and panel **f** uses the same colors for the strips on
+  its edges, so a lineage keeps its color across the figure.
+- The sequential scale of panel **f** is three shades of one Okabe-Ito color, from
+  `journal_ramp()`; the two ends of the scale of panel **c** are two other
+  colors of the palette, through white.
+- The check compares the colors of each panel with each other, not those of
+  different panels, since every panel has its own legend. The panels here share
+  Okabe-Ito, which keeps its colors apart for every kind of vision.
+
+---
+
+## 6. Packages and Credits
 
 `themeset` calls these packages by name, and the work is theirs. They are
 suggested, so `themeset` works without them.
@@ -347,7 +559,9 @@ suggested, so `themeset` works without them.
 | ggraph | the circular network | Thomas Lin Pedersen |
 | igraph | the graph of the network | Gábor Csárdi, Tamás Nepusz, Vincent Traag, Szabolcs Horvát, Fabio Zanini, Daniel Noom, Kirill Müller, David Schoch and Maëlle Salmon |
 | circlize | the circos plot and its ideogram | Zuguang Gu |
-| patchwork | the four-panel figure | Thomas Lin Pedersen |
+| patchwork | the four-panel figure and the layout of the composite figure | Thomas Lin Pedersen |
+| ComplexHeatmap | the heat maps and the oncoprint of the composite figure | Zuguang Gu |
+| ggridges | the ridgelines of the composite figure | Claus O. Wilke |
 
 The palettes are those of ggsci (`npg`) and, for the Okabe-Ito colors, of base R;
 see [Comparing Figures Across Journals](journal-figures.html) for their credits.
@@ -361,6 +575,7 @@ see [Comparing Figures Across Journals](journal-figures.html) for their credits.
 | A circular network | `ggraph(layout)` with `create_layout(graph, "linear", circular = TRUE)`, `geom_edge_arc()` and `geom_node_point()` |
 | A circos plot | `circos.initializeWithIdeogram()` and `circos.genomicTrack()` of circlize, with colors from `journal_colors()` |
 | A figure of several panels | patchwork, with `journal_theme()` on each panel and tags from `journal_tags()` |
-| Check the panels | `journal_check(list(a, b, c, d), "nature", column = "double")` |
+| A composite of ggplot2 and ComplexHeatmap panels | `wrap_elements(full = grid.grabExpr(draw(<heat map>)))` in a patchwork layout |
+| Check the panels | `journal_check(list(a, b, c, d), "nature", column = "double", height = 170)` |
 | Colors for ordered groups | `journal_ramp("nature", 3)` |
 | A palette by name | `scale_color_set("npg")` |

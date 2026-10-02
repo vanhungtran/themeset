@@ -361,6 +361,32 @@ test_that("journal_check() warns about colors that are hard to tell apart", {
   expect_equal(grey$status[grey$check == "colors"], "info")
 })
 
+test_that("journal_check() compares the colors of each panel, not of all the panels together", {
+  skip_if_not_installed("colorspace")
+  d <- data.frame(x = 1:2, y = 1:2, g = c("a", "b"))
+  panel <- function(colors) {
+    ggplot2::ggplot(d, ggplot2::aes(x, y, color = g)) +
+      ggplot2::geom_point() +
+      ggplot2::scale_color_manual(values = colors)
+  }
+  status <- function(chk) chk$status[chk$check == "colors"]
+
+  # the orange of the second panel is almost the orange of the first, but each panel has its own legend
+  expect_equal(status(journal_check(list(panel(c("#E69F00", "#0072B2")), panel(c("#E69F10", "#D55E00"))), "nature")), "pass")
+
+  # two colors that are close in one panel are flagged
+  expect_equal(status(journal_check(list(panel(c("#E69F00", "#0072B2")), panel(c("#E69F00", "#E69F10"))), "nature")), "warn")
+
+  # a panel with a gradient is left out, and the others are still compared
+  many <- ggplot2::ggplot(data.frame(x = 1:20, y = 1:20, g = factor(1:20)), ggplot2::aes(x, y, color = g)) +
+    ggplot2::geom_point() +
+    ggplot2::scale_color_manual(values = grDevices::hcl.colors(20, "Dynamic"))
+  chk <- journal_check(list(panel(c("#E69F00", "#0072B2")), many), "nature")
+  expect_equal(status(chk), "pass")
+  expect_match(chk$note[chk$check == "colors"], "not compared")
+  expect_equal(status(journal_check(many, "nature")), "info")
+})
+
 test_that("journal_check() takes a list of panels, and prints a table", {
   p <- apply_journal(growth_plot(), "nature")
   big <- p + ggplot2::theme(text = ggplot2::element_text(size = 12))

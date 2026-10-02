@@ -40,8 +40,9 @@ that are not aligned: look at the figure for those.
 The colors are compared as in \code{\link[=compare_palettes]{compare_palettes()}}: the smallest CIEDE2000
 distance between two of them, with normal vision and with the simulated
 deficiencies. A pair below 10 gives a warning. Greys, black and white are left
-out, and a figure with more than twelve colors, which has a gradient, is not
-compared.
+out, and a panel with more than twelve colors, which has a gradient, is not
+compared. For a list of panels the colors are compared within each panel, since
+each panel has its own legend, and the panel with the closest pair is reported.
 
 The height is checked only if you give it; a plot has no width or height of
 its own, which come from the journal and from how you save it.

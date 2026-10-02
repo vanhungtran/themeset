@@ -129,10 +129,11 @@ has the details and the sources.
 
 The
 [gallery](https://vanhungtran.github.io/themeset/articles/figure-gallery.html)
-draws a circular network, a circos plot, a four-panel figure and a
-grouped dot plot from simulated data, with the palettes and the journal
-themes of `themeset`. The packages that draw the first three (ggraph,
-circlize and patchwork) are suggested, not required.
+draws a circular network, a circos plot, a four-panel figure, a grouped
+dot plot and a composite figure of nine panels with heat maps and an
+oncoprint, from simulated data, with the palettes and the journal themes
+of `themeset`. The packages that draw them (ggraph, circlize, patchwork,
+ComplexHeatmap and ggridges) are suggested, not required.
 
 ## Documentation
 
@@ -173,8 +174,9 @@ which base R provides, and, when it is installed, colorspace (Ross
 Ihaka, Paul Murrell, Kurt Hornik, Jason C. Fisher, Reto Stauffer, Claus
 O. Wilke, Claire D. McWhite and Achim Zeileis). The gallery draws with
 igraph (Gábor Csárdi, Tamás Nepusz and others), ggraph and patchwork
-(Thomas Lin Pedersen) and circlize (Zuguang Gu), which are suggested as
-well. The journal sets use palettes that are named after journals;
-`themeset` is not affiliated with any journal. The [sources and
+(Thomas Lin Pedersen), circlize and ComplexHeatmap (Zuguang Gu) and
+ggridges (Claus O. Wilke), which are suggested as well. The journal sets
+use palettes that are named after journals; `themeset` is not affiliated
+with any journal. The [sources and
 credits](https://vanhungtran.github.io/themeset/articles/theme-sets-and-scales.html#sources-and-credits)
 section of the article on theme sets and color scales has the details.

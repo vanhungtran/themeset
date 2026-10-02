@@ -1,3 +1,14 @@
+# themeset 1.7.2
+
+* The gallery has a fifth figure: a composite of nine panels in the theme of
+  Nature, 183 by 170 mm, that puts heat maps and an oncoprint from ComplexHeatmap
+  next to ggplot2 panels with patchwork. It needs ComplexHeatmap (Bioconductor)
+  and ggridges, which are suggested.
+* `journal_check()` compares the colors of each panel with each other, and
+  reports the panel with the closest pair. Before, the colors of all the panels
+  of a list were compared together, which warned about two similar colors that
+  were in different panels, each with its own legend.
+
 # themeset 1.7.1
 
 * A new article, "A Gallery of Figure Types", draws four kinds of figure from

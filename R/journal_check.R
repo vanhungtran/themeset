@@ -102,8 +102,9 @@ drawn_colors <- function(plot) {
 #' The colors are compared as in [compare_palettes()]: the smallest CIEDE2000
 #' distance between two of them, with normal vision and with the simulated
 #' deficiencies. A pair below 10 gives a warning. Greys, black and white are left
-#' out, and a figure with more than twelve colors, which has a gradient, is not
-#' compared.
+#' out, and a panel with more than twelve colors, which has a gradient, is not
+#' compared. For a list of panels the colors are compared within each panel, since
+#' each panel has its own legend, and the panel with the closest pair is reported.
 #'
 #' The height is checked only if you give it; a plot has no width or height of
 #' its own, which come from the journal and from how you save it.
@@ -203,17 +204,24 @@ journal_check <- function(plot, journal = "nature", column = "single", height = 
         sprintf("%.2f pt", thinnest), paste0(">= ", format(min_line_pt), " pt"), names(lines)[which.min(lines)])
   }
 
-  # Colors
-  colors <- unique(unlist(lapply(plots, drawn_colors)))
-  if (length(colors) < 2L) {
-    add("colors", "info", paste(length(colors), "color(s)"), "", "nothing to compare")
-  } else if (length(colors) > 12L) {
-    add("colors", "info", paste(length(colors), "colors"), "", "a gradient or many colors: not compared")
+  # Colors: compared within a panel, since each panel has its own legend
+  panel_colors <- lapply(plots, drawn_colors)
+  counts <- lengths(panel_colors)
+  comparable <- panel_colors[counts >= 2L & counts <= 12L]
+  many <- any(counts > 12L)
+  if (!length(comparable)) {
+    add("colors", "info", paste(max(counts), if (many) "colors" else "color(s)"), "",
+        if (many) "a gradient or many colors: not compared" else "nothing to compare")
   } else {
     visions <- c("normal", "deutan", "protan", "tritan")
-    distance <- vapply(visions, function(v) min_color_distance(colors, v), numeric(1))
+    by_panel <- vapply(comparable, function(colors) {
+      vapply(visions, function(v) min_color_distance(colors, v), numeric(1))
+    }, numeric(length(visions)))
+    distance <- apply(by_panel, 1L, function(x) if (all(is.na(x))) NA_real_ else min(x, na.rm = TRUE))
     worst <- min(distance, na.rm = TRUE)
-    note <- sprintf("%d colors; closest pair with %s vision", length(colors), visions[which.min(replace(distance, is.na(distance), Inf))])
+    note <- sprintf("%s%d colors; closest pair with %s vision", if (length(comparable) > 1L) "up to " else "",
+                    max(lengths(comparable)), visions[which.min(replace(distance, is.na(distance), Inf))])
+    if (many) note <- paste0(note, "; a panel with a gradient or many colors is not compared")
     if (anyNA(distance)) note <- paste0(note, "; install colorspace to simulate color-vision deficiency")
     if (worst < 10) note <- paste0(note, "; palette = \"okabe_ito\" is made for this")
     add("colors", if (worst >= 10) "pass" else "warn", sprintf("%.1f", worst), ">= 10 (CIEDE2000)", note)
