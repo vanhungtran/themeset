@@ -161,6 +161,8 @@ Tutorials and the function reference are on the package website,
   Journals](https://vanhungtran.github.io/themeset/articles/journal-figures.html)
 - [A Gallery of Figure
   Types](https://vanhungtran.github.io/themeset/articles/figure-gallery.html)
+- [A Showcase of Themes and
+  Colors](https://vanhungtran.github.io/themeset/articles/showcase.html)
 
 The same articles, with their figures, are in the repository as
 Markdown, for reading on GitHub: [articles/](articles/).

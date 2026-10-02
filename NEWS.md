@@ -20,6 +20,9 @@
   text of different sizes, and different font families.
 * The article "Comparing Figures Across Journals" has two new sections, on
   repairing a figure and on the figures of one paper.
+* A new article, "A Showcase of Themes and Colors", draws one plot in twelve
+  theme sets, ranks twelve palettes by how well readers with color-vision
+  deficiency can tell their colors apart, and sets the plot in four journals.
 
 # themeset 1.7.2
 
