@@ -2,6 +2,8 @@
 title: "A Showcase of Themes and Colors"
 output:
   rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
     includes:
       before_body: lightbox.html
 vignette: >
@@ -45,8 +47,9 @@ p <- ggplot(od, aes(time, value, color = strain)) +
 
 Journal styles on white, news and magazine styles with their own background, and
 the three dark themes of `themeset`, which suit slides. The journal sets bring
-their own palette. The other sets change only the theme, so these copies use the
-Okabe-Ito palette, which has a color for each of the six groups.
+their own palette. Most of the other sets change only the theme, and
+`fivethirtyeight` has a palette of three colors, too few for six groups, so these
+copies use the Okabe-Ito palette, which has a color for each group.
 
 ```{r themes, eval = has_patchwork, fig.width = 16, fig.height = 11, fig.alt = "Twelve copies of a line plot of the OD600 of six strains, each in a theme set: npg, lancet, jco, nejm, fivethirtyeight, economist, wsj, solarized, nyt, midnight, royal and deepblue."}
 with_palette <- c("npg", "lancet", "jco", "nejm")
