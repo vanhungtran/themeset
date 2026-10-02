@@ -384,6 +384,15 @@ test_that("journal_check() warns about a figure that was assembled from panels",
   expect_no_warning(journal_check(list(p, p), "nature"))
 })
 
+test_that("device_opens() tells a device that opens from one that does not", {
+  before <- grDevices::dev.list()
+  expect_true(themeset:::device_opens(grDevices::pdf))
+  # opens nothing: what cairo_pdf() does on a macOS without XQuartz, although capabilities("cairo") is TRUE
+  expect_false(themeset:::device_opens(function(file) invisible(NULL)))
+  expect_false(themeset:::device_opens(function(file) stop("no such device")))
+  expect_equal(grDevices::dev.list(), before)
+})
+
 test_that("save_journal_figure() saves at the size of the column", {
   p <- apply_journal(growth_plot(), "nature")
 

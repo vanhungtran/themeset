@@ -47,6 +47,10 @@ A figure made by \code{\link[=compare_journals]{compare_journals()}} is saved at
 \code{journal}, \code{column} and \code{height} are ignored. Use a vector format (\code{.pdf})
 where the journal asks for one; a \code{.png} is for previews and for the
 journals that take bitmaps.
+
+A \code{.pdf} is written with the cairo device, which embeds the fonts, when R can
+use it, and with the standard \code{pdf()} device otherwise (on macOS cairo needs
+XQuartz). A \code{.png} is written with the ragg package when it is installed.
 }
 \examples{
 \dontrun{

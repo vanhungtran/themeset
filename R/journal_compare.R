@@ -190,6 +190,22 @@ compare_palettes <- function(sets = unique(journal_registry()$palette), n = 6, t
   out
 }
 
+# TRUE if a graphics device opens. On macOS, capabilities("cairo") is TRUE even where
+# R cannot load the cairo library (it needs XQuartz); the device then opens nothing
+# and the figure is not saved, so ask the device itself.
+device_opens <- function(device) {
+  file <- tempfile(fileext = ".pdf")
+  on.exit(unlink(file), add = TRUE)
+  before <- grDevices::dev.cur()
+  suppressWarnings(try(device(file), silent = TRUE))
+  opened <- grDevices::dev.cur() != before
+  if (opened) {
+    grDevices::dev.off()
+    if (before > 1L) grDevices::dev.set(before)
+  }
+  unname(opened)
+}
+
 #' Save a Figure at the Size of a Journal
 #'
 #' Saves a plot, in the file format given by the extension of the file name, at
@@ -200,6 +216,10 @@ compare_palettes <- function(sets = unique(journal_registry()$palette), n = 6, t
 #' `journal`, `column` and `height` are ignored. Use a vector format (`.pdf`)
 #' where the journal asks for one; a `.png` is for previews and for the
 #' journals that take bitmaps.
+#'
+#' A `.pdf` is written with the cairo device, which embeds the fonts, when R can
+#' use it, and with the standard `pdf()` device otherwise (on macOS cairo needs
+#' XQuartz). A `.png` is written with the ragg package when it is installed.
 #'
 #' @inheritParams compare_journals
 #' @param plot A ggplot object, or the page made by [compare_journals()].
@@ -238,7 +258,7 @@ save_journal_figure <- function(plot, filename, journal = NULL, column = "single
   }
 
   extension <- tolower(sub("^.*\\.", "", filename))
-  device <- if (extension == "pdf" && isTRUE(capabilities("cairo"))) {
+  device <- if (extension == "pdf" && isTRUE(capabilities("cairo")) && device_opens(grDevices::cairo_pdf)) {
     grDevices::cairo_pdf
   } else if (extension == "png" && requireNamespace("ragg", quietly = TRUE)) {
     ragg::agg_png
