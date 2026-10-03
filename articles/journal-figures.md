@@ -9,9 +9,11 @@ Comparing Figures Across Journals
   - [Groups That Have an Order](#groups-that-have-an-order)
   - [Colors That Stay with a Group](#colors-that-stay-with-a-group)
 - [5. Checking a Figure](#5-checking-a-figure)
-- [6. Saving at the Size of the
-  Journal](#6-saving-at-the-size-of-the-journal)
-- [7. Sources and Credits](#7-sources-and-credits)
+- [6. Repairing a Figure](#6-repairing-a-figure)
+- [7. The Figures of One Paper](#7-the-figures-of-one-paper)
+- [8. Saving at the Size of the
+  Journal](#8-saving-at-the-size-of-the-journal)
+- [9. Sources and Credits](#9-sources-and-credits)
 - [Summary](#summary)
 
 ``` r
@@ -40,6 +42,8 @@ one journal and set next to the same figure in another.
 | `compare_journals()` | One figure in several journals, side by side and to scale |
 | `compare_palettes()` | Which palettes keep their colors apart, also for readers with color-vision deficiency |
 | `journal_check()` | A table of what a figure gets right and wrong for a journal |
+| `journal_fix()` | Repairs what the check finds, and checks again |
+| `match_style()`, `journal_audit()` | The figures of one paper: one style, the same color for a group, and a check of them all |
 | `save_journal_figure()` | Saves a figure at the width of a column |
 
 The numbers come from the author guides of the journals, which were read
@@ -473,7 +477,131 @@ the panels.
 
 ------------------------------------------------------------------------
 
-## 6. Saving at the Size of the Journal
+## 6. Repairing a Figure
+
+`journal_fix()` changes what `journal_check()` finds wrong, checks the
+figure again, and stops when the checks pass or nothing more can be
+changed. The changes are small on purpose: a text that is too small is
+raised to the smallest size that the journal allows and no further, a
+line that is too thin gets 0.25 pt, a panel tag gets the case of the
+journal, and the rest of the plot stays as it is. Take a plot that was
+drawn for a slide, with small text, hairline error bars and a capital
+tag:
+
+``` r
+slide <- ggplot(od, aes(time, value, color = strain)) +
+  geom_errorbar(aes(ymin = value - se, ymax = value + se), width = 2, linewidth = 0.05) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Incubation time (hr)", y = "OD600", color = NULL, tag = "A") +
+  theme_classic(base_size = 5)
+
+journal_check(slide, "nature")
+#> Check against Nature: fail
+#> check          status  value      limit              note
+#> width          info    89 mm                         single column
+#> height         info    not given  <= 170 mm          
+#> smallest text  fail    4.0 pt     >= 5 pt            axis.text.x
+#> largest text   pass    5.0 pt     <= 7 pt            axis.title.x
+#> panel tags     warn    A          lowercase          Nature prints lowercase tags
+#> thinnest line  fail    0.14 pt    >= 0.25 pt         layer 1 (GeomErrorbar)
+#> colors         warn    3.9        >= 10 (CIEDE2000)  6 colors; closest pair with protan vision; palette = "okabe_ito" is made for this
+```
+
+``` r
+fixed <- journal_fix(slide, "nature")
+attr(fixed, "fixes")
+#>   round panel  check                 target  before            after
+#> 1     1     1   text            axis.text.x  4.0 pt           5.0 pt
+#> 2     1     1   text            axis.text.y  4.0 pt           5.0 pt
+#> 3     1     1   text            legend.text  4.0 pt           5.0 pt
+#> 4     1     1  lines layer 1 (GeomErrorbar) 0.14 pt          0.25 pt
+#> 5     1     1   tags               plot.tag       A                a
+#> 6     1     1 colors                 colour     3.9 11.5 (okabe_ito)
+attr(fixed, "check")
+#> Check against Nature: pass
+#> check          status  value      limit              note
+#> width          info    89 mm                         single column
+#> height         info    not given  <= 170 mm          
+#> smallest text  pass    5.0 pt     >= 5 pt            axis.text.x
+#> largest text   pass    5.0 pt     <= 7 pt            axis.text.x
+#> panel tags     pass    a          lowercase          
+#> thinnest line  pass    0.25 pt    >= 0.25 pt         layer 1 (GeomErrorbar)
+#> colors         pass    11.5       >= 10 (CIEDE2000)  6 colors; closest pair with deutan vision
+```
+
+The colors are replaced by the Okabe-Ito palette only when two of them
+are hard to tell apart, and only if the new colors are easier to tell
+apart than the old ones; with more than eight groups they are left
+alone. `fix = c("text", "lines")` limits the repair to some of the
+checks. The height cannot be repaired from the plot: give it to
+`save_journal_figure()`.
+
+`journal_fix()` is for a plot whose style you want to keep. To give a
+plot the whole style of the journal, `apply_journal()` is simpler.
+
+------------------------------------------------------------------------
+
+## 7. The Figures of One Paper
+
+The figures of a paper should agree with each other: a strain that is
+blue in Figure 1 should be blue in Figure 2 as well, and the text of the
+axes should have one size throughout. `journal_audit()` checks a list of
+figures. Each figure is checked against the journal, as with
+`journal_check()`, and then the figures are compared:
+
+``` r
+final <- ggplot(subset(od, time == max(time)), aes(strain, value, fill = strain)) +
+  geom_col() +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  labs(x = NULL, y = "Final OD600", fill = NULL)
+
+figures <- list(
+  "Figure 1" = apply_journal(p, "nature", palette = "okabe_ito"),
+  "Figure 2" = apply_journal(final, "nature", palette = "npg")
+)
+audit <- journal_audit(figures, "nature")
+audit[, c("figure", "check", "status", "value")]
+#>     figure        check status                value
+#> 1 Figure 1      journal   pass      all checks pass
+#> 2 Figure 2       colors   warn                  8.0
+#> 3      all group colors   warn 6 of 6 groups differ
+#> 4      all  tick labels   pass               5.6 pt
+#> 5      all  axis titles   pass               7.0 pt
+#> 6      all  font family   pass              default
+```
+
+The two figures give the strains different colors. `match_style()` draws
+a plot in the style of a reference: the theme of the reference, and its
+color for each group that the two share. A group that the reference does
+not have gets a color of its palette that no group of the reference
+uses.
+
+``` r
+figures[["Figure 2"]] <- match_style(final, figures[["Figure 1"]])
+audit <- journal_audit(figures, "nature")
+audit[, c("figure", "check", "status", "value")]
+#>     figure        check status           value
+#> 1 Figure 1      journal   pass all checks pass
+#> 2 Figure 2      journal   pass all checks pass
+#> 3      all group colors   pass 6 shared groups
+#> 4      all  tick labels   pass          5.6 pt
+#> 5      all  axis titles   pass          7.0 pt
+#> 6      all  font family   pass         default
+```
+
+``` r
+figures[["Figure 2"]]
+```
+
+<img src="journal-figures_files/figure-gfm/match_plot-1.png" alt="A bar chart of the final OD600 of each strain, in the theme of Figure 1 and with the color of each strain in Figure 1." width="50%" />
+
+The attribute `colors` of the audit lists the color of every group in
+every figure, for a legend or a record.
+
+------------------------------------------------------------------------
+
+## 8. Saving at the Size of the Journal
 
 A text size of 7 pt is 7 pt on the page only if the figure is saved at
 the size it was drawn for. `save_journal_figure()` saves at the width of
@@ -498,7 +626,7 @@ the font is installed on your system.
 
 ------------------------------------------------------------------------
 
-## 7. Sources and Credits
+## 9. Sources and Credits
 
 The numbers of the templates come from the author guides below, read in
 October 2026. Where a guide gives no number, the field is blank and a
@@ -552,4 +680,7 @@ BMJ, JCO and Frontiers).
 | Shades for ordered groups | `journal_ramp("nature", 4)` |
 | See if a palette is safe | `compare_palettes()` |
 | Check a figure against a journal | `journal_check(p, "nature", height = 60)` |
+| Repair what the check finds | `journal_fix(p, "nature")` |
+| Give a figure the style and colors of another | `match_style(p, reference)` |
+| Check all the figures of a paper | `journal_audit(list(fig1, fig2, fig3), "nature")` |
 | Save at the right size | `save_journal_figure(fig, "figure1.pdf", journal = "nature")` |
