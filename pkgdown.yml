@@ -1,0 +1,16 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  figure-gallery: figure-gallery.html
+  global-and-custom-themes: global-and-custom-themes.html
+  journal-figures: journal-figures.html
+  markdown-themes: markdown-themes.html
+  multi-panel-figure: multi-panel-figure.html
+  showcase: showcase.html
+  theme-sets-and-scales: theme-sets-and-scales.html
+  themeset: themeset.html
+last_built: 2026-10-03T11:48Z
+urls:
+  reference: https://vanhungtran.github.io/themeset/reference
+  article: https://vanhungtran.github.io/themeset/articles
