@@ -1,3 +1,14 @@
+# themeset 1.8.1
+
+* A new article, "A Figure Set for a Reanalysis", draws seven figures from
+  simulated data: heat maps and statements, an atlas of cells, a reference
+  against its reanalysis gene by gene, a mechanism, quality control and proteins,
+  a scorecard whose numbers are computed from the figures before it, and images.
+  The figures share one color contract (a color for each group, for a verdict and
+  for a direction), are in the theme of Nature at 183 mm, and are checked together
+  with `journal_audit()`. The panels are laid out with patchwork, which is
+  suggested.
+
 # themeset 1.8.0
 
 ## Repairing figures

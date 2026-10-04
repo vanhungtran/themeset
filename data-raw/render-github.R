@@ -26,7 +26,7 @@ pkgload::load_all(".", quiet = TRUE)
 
 articles <- c("themeset", "theme-sets-and-scales", "markdown-themes",
               "global-and-custom-themes", "multi-panel-figure", "journal-figures",
-              "figure-gallery", "showcase")
+              "figure-gallery", "showcase", "figure-set")
 dir.create("articles", showWarnings = FALSE)
 
 # The files are committed, so write the same line endings on every system

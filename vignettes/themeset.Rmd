@@ -61,8 +61,10 @@ This vignette is a short tour. The other articles go deeper:
 [Markdown-Enabled Themes](markdown-themes.html),
 [Global and Custom Themes](global-and-custom-themes.html),
 [A Multi-Panel Figure](multi-panel-figure.html),
-[Comparing Figures Across Journals](journal-figures.html) and
-[A Gallery of Figure Types](figure-gallery.html).
+[Comparing Figures Across Journals](journal-figures.html),
+[A Gallery of Figure Types](figure-gallery.html),
+[A Showcase of Themes and Colors](showcase.html) and
+[A Figure Set for a Reanalysis](figure-set.html).
 
 ### Example Data
 

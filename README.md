@@ -142,6 +142,13 @@ oncoprint, from simulated data, with the palettes and the journal themes
 of `themeset`. The packages that draw them (ggraph, circlize, patchwork,
 ComplexHeatmap and ggridges) are suggested, not required.
 
+A [figure
+set](https://vanhungtran.github.io/themeset/articles/figure-set.html)
+draws the seven figures of a reanalysis, also from simulated data: heat
+maps, an atlas of cells, a comparison of a reference with its
+reanalysis, quality control, a scorecard and images. All of them share
+one color contract, and `journal_audit()` checks the set at the end.
+
 ## Documentation
 
 Tutorials and the function reference are on the package website,
@@ -163,6 +170,8 @@ Tutorials and the function reference are on the package website,
   Types](https://vanhungtran.github.io/themeset/articles/figure-gallery.html)
 - [A Showcase of Themes and
   Colors](https://vanhungtran.github.io/themeset/articles/showcase.html)
+- [A Figure Set for a
+  Reanalysis](https://vanhungtran.github.io/themeset/articles/figure-set.html)
 
 The same articles, with their figures, are in the repository as
 Markdown, for reading on GitHub: [articles/](articles/).

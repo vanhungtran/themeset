@@ -12,5 +12,6 @@ They are the vignettes in `vignettes/`; the package website,
 - [Comparing Figures Across Journals](journal-figures.md)
 - [A Gallery of Figure Types](figure-gallery.md)
 - [A Showcase of Themes and Colors](showcase.md)
+- [A Figure Set for a Reanalysis](figure-set.md)
 
 These files are written by `data-raw/render-github.R`; edit the vignettes, not these files.

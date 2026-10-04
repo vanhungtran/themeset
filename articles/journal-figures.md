@@ -597,7 +597,9 @@ figures[["Figure 2"]]
 <img src="journal-figures_files/figure-gfm/match_plot-1.png" alt="A bar chart of the final OD600 of each strain, in the theme of Figure 1 and with the color of each strain in Figure 1." width="50%" />
 
 The attribute `colors` of the audit lists the color of every group in
-every figure, for a legend or a record.
+every figure, for a legend or a record. The article [A Figure Set for a
+Reanalysis](figure-set.md) audits seven figures that share one color
+contract.
 
 ------------------------------------------------------------------------
 
