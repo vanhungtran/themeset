@@ -1,3 +1,14 @@
+# themeset 1.8.4
+
+* The figures of "A Figure Set for a Reporting Study" are checked as PDF files,
+  which finds what `journal_audit()` cannot see: text on a line or on another text.
+  They now have labels of 6 pt, no grid line behind a number, the categories written
+  as upright numbers, and a plot background without an outline. Each figure has a
+  full legend: a title sentence, a clause for each panel and the definitions. The
+  third figure shows the reports of each drug in place of the number of signals.
+* The heat maps of the two articles on figure sets use the named color
+  `"firebrick"` for values above the reference.
+
 # themeset 1.8.3
 
 * A new article, "A Figure Set for a Reporting Study", draws five figures from

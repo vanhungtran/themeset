@@ -83,11 +83,13 @@ okabe_ito <- journal_colors("cell")   # orange, sky blue, bluish green, yellow, 
 
 class_levels <- c("Class A", "Class B", "Class C", "No class")
 class_fill <- c(`Class A` = okabe_ito[3], `Class B` = okabe_ito[1], `Class C` = okabe_ito[7], `No class` = "grey60")
-direction <- c(low = okabe_ito[5], mid = "white", high = "#B2182B")       # below 1 is blue, above 1 is red
+direction <- c(low = okabe_ito[5], mid = "white", high = "firebrick")       # below 1 is blue, above 1 is red
 
 # one theme for every panel, and the sizes that the panels share
-figure_theme <- journal_theme("nature")
-small_text <- 5.5 / .pt                       # annotations are 5.5 pt (geom_text sizes are in mm)
+figure_theme <- journal_theme("nature") +
+  theme(plot.background = element_rect(fill = "white", colour = NA))   # no outline: it is a stroked path that crosses text where panels meet
+small_text <- 6 / .pt                         # direct labels and notes are 6 pt (geom_text sizes are in mm)
+tile_text <- 5.5 / .pt                        # numbers inside tiles and beside marks are 5.5 pt
 strip_text <- theme(strip.background = element_blank(), strip.text = element_text(face = "bold"))
 tag_theme <- theme(plot.tag = element_text(size = 8, face = "bold"))
 
@@ -100,8 +102,14 @@ design_rows <- function(rows) {
 tag_panels <- function(figure, n) {
   figure + plot_annotation(tag_levels = list(journal_tags("nature", n)), theme = tag_theme)
 }
+category_number <- function(x) sub("Category ", "", x)     # "Category 3" is written 3 under the axis title Category
 minus <- function(x) sub("-", "\u2212", x, fixed = TRUE)      # a real minus sign
 ```
+
+The theme draws the background of a plot without an outline. The themes
+of ggplot2 draw a white one, which in a PDF is a stroked path that
+nobody can see, and a check of the rendered file finds it wherever a
+label sits across the edge of two panels.
 
 The study itself is made of the counts of reports. Eleven drugs have
 between 2,300 and 46,000 reports, and 900,000 reports of other drugs are
@@ -211,9 +219,9 @@ flow <- ggplot() +
   geom_segment(data = down, aes(x = x, xend = x, y = y, yend = yend), arrow = arrowhead, linewidth = 0.4, colour = "grey30") +
   geom_rect(data = boxes, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill), colour = "grey35", linewidth = 0.3) +
   geom_rect(data = strips, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill)) +
-  geom_text(data = boxes, aes(x = x, y = ymax - 2.5 - 1.4 * (ymax < 30), label = head, colour = ink), size = 6.2 / .pt, fontface = "bold") +
+  geom_text(data = boxes, aes(x = x, y = ymax - 2.5 - 1.4 * (ymax < 30), label = head, colour = ink), size = 6.5 / .pt, fontface = "bold") +
   geom_text(data = boxes, aes(x = x, y = y, label = big(n), colour = ink), size = 7 / .pt, fontface = "bold") +
-  geom_text(data = boxes, aes(x = x, y = ymin + 2.3, label = note, colour = ink), size = 5.2 / .pt) +
+  geom_text(data = boxes, aes(x = x, y = ymin + 2.3, label = note, colour = ink), size = 6 / .pt) +
   geom_text(data = notes, aes(x = x, y = y, label = label), hjust = 0, size = small_text, colour = "grey20", lineheight = 0.95) +
   scale_fill_identity() + scale_colour_identity() +
   scale_x_continuous(limits = c(0, 100), expand = expansion(0)) + scale_y_continuous(limits = c(5, 100), expand = expansion(0)) +
@@ -224,8 +232,10 @@ tag_panels(flow, 1)
 
 <img src="reporting-study_files/figure-gfm/figure_1-1.png" alt="A flow chart of three boxes in dark to light grey, one below the other, joined by arrows with notes about what was removed at the right of each arrow. The last of them splits into two pale boxes, with a strip of three colors above the first and a grey strip above the second." width="66%" />
 
-_Figure 1. The flow of the cases: records, unique cases, the analysis
-set, and its two groups._
+_Figure 1. Flow of the cases into the analysis. The records of the
+extract, the unique cases, the analysis set of Drugs 1 to 11, and its
+two groups, with what is removed at each step written beside its arrow.
+The strips give the colors of the classes. All counts are simulated._
 
 - The first three boxes are three steps of grey, darkest first, and the
   last two are pale. The only colors of the chart are the strips on top
@@ -267,7 +277,7 @@ cumulative$group <- drug_group[cumulative$drug]
 ends <- cumulative[cumulative$year == max(years), ]
 ends <- ends[order(ends$total), ]
 ends$y <- log10(ends$total)
-for (i in seq_len(nrow(ends))[-1]) ends$y[i] <- max(ends$y[i], ends$y[i - 1] + 0.1)     # labels at least 0.1 apart on the log scale
+for (i in seq_len(nrow(ends))[-1]) ends$y[i] <- max(ends$y[i], ends$y[i - 1] + 0.12)     # labels at least 0.12 apart on the log scale
 
 # b: the routes of each drug
 p1 <- runif(11, 0.2, 0.88); p3 <- runif(11, 0.01, 0.1)
@@ -290,7 +300,7 @@ panels_2 <- list(
     geom_text(data = ends, aes(x = max(years) + 0.25, y = 10^y, label = drug), hjust = 0, size = small_text, show.legend = FALSE) +
     scale_colour_manual(values = class_fill, name = NULL, drop = FALSE) +
     scale_x_continuous(breaks = seq(2012, 2024, 4), expand = expansion(add = c(0.3, 2.2))) +
-    scale_y_log10(breaks = c(1e2, 1e3, 1e4), labels = c("100", "1,000", "10,000")) +
+    scale_y_log10(breaks = c(1e2, 1e3, 1e4), labels = c("100", "1,000", "10,000"), expand = expansion(mult = c(0.02, 0.1))) +
     labs(x = "Year", y = "Cumulative reports", title = "Reports of each drug") +
     figure_theme,
   B = ggplot(route_mix, aes(share, drug, fill = route)) +
@@ -303,15 +313,14 @@ panels_2 <- list(
     labs(x = "Reports (%)", y = NULL, title = "Route of administration") +
     figure_theme,
   C = ggplot(signal, aes(event, drug)) +
-    geom_point(data = cells, aes(event, as.character(drug)), size = 0.3, colour = "grey80", inherit.aes = FALSE) +
+    geom_tile(data = cells, aes(event, as.character(drug)), fill = "grey96", colour = NA, width = 0.94, height = 0.9, inherit.aes = FALSE) +
     geom_point(aes(size = a, colour = group), alpha = 0.85, shape = 16, show.legend = c(size = TRUE, colour = FALSE)) +
-    geom_text(aes(label = format(a, big.mark = ",", trim = TRUE)), nudge_x = 0.36, hjust = 0, size = 5 / .pt) +
-    axis_drugs + scale_x_discrete(limits = events, expand = expansion(add = c(0.5, 0.9))) +
+    geom_text(aes(label = format(a, big.mark = ",", trim = TRUE)), nudge_x = 0.5, hjust = 0, size = tile_text) +
+    axis_drugs + scale_x_discrete(limits = events, labels = category_number, expand = expansion(add = c(0.5, 1))) +
     scale_size_area(max_size = 5.2, breaks = c(100, 1000, 5000), labels = c("100", "1,000", "5,000"), name = "Reports") +
     scale_colour_manual(values = class_fill, guide = "none") +
-    labs(x = NULL, y = NULL, title = "Cells with a signal") +
-    figure_theme +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_line(colour = "grey92", linewidth = 0.25)),
+    labs(x = "Category", y = NULL, title = "Cells with a signal") +
+    figure_theme,
   D = ggplot(onset, aes(share, drug, fill = bin)) +
     geom_col(width = 0.78, colour = "white", linewidth = 0.2) +
     axis_drugs + scale_x_continuous(breaks = c(0, 0.5, 1), labels = c("0", "50", "100"), expand = expansion(0)) +
@@ -320,13 +329,12 @@ panels_2 <- list(
     figure_theme + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()),
   E = ggplot(median_onset, aes(event, drug, fill = days)) +
     geom_tile(colour = "white", linewidth = 0.3) +
-    geom_text(aes(label = days, colour = days > 200), size = 5 / .pt, show.legend = FALSE) +
-    axis_drugs + scale_x_discrete(expand = expansion(0)) +
+    geom_text(aes(label = days, colour = days > 200), size = tile_text, show.legend = FALSE) +
+    axis_drugs + scale_x_discrete(labels = category_number, expand = expansion(0)) +
     scale_colour_manual(values = c(`TRUE` = "white", `FALSE` = "black")) +
     scale_fill_gradient(low = "white", high = grey(0.3), name = "Median\ndays") +
-    labs(x = NULL, y = NULL, title = "Median time to event") +
-    figure_theme + theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_blank(),
-                         axis.ticks.y = element_blank(), axis.line = element_blank())
+    labs(x = "Category", y = NULL, title = "Median time to event") +
+    figure_theme + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line = element_blank())
 )
 tag_panels(wrap_plots(panels_2, design = design_rows(list(c(A = 20, B = 16), c(C = 15, D = 8, E = 13))), heights = c(55, 80)) +
              plot_layout(guides = "collect"), 5)
@@ -334,14 +342,22 @@ tag_panels(wrap_plots(panels_2, design = design_rows(list(c(A = 20, B = 16), c(C
 
 <img src="reporting-study_files/figure-gfm/figure_2-1.png" alt="A figure of five panels, a to e. Panel a has eleven rising lines on a logarithmic axis, colored by class, each labeled with its drug. Panel b has eleven horizontal bars in three colors. Panel c is a matrix of eleven rows and eight columns, with a few colored dots of different sizes and a number beside each. Panel d has eleven horizontal bars in three greys. Panel e is a grid of eleven rows and eight columns with a number in each tile, in shades of grey." width="100%" />
 
-_Figure 2. Reports, routes and time: cumulative reports of each drug, the
-routes of administration, the cells with a signal, and the time to the
-event._
+_Figure 2. Reports, routes and time to the event for 11 drugs. a,
+Cumulative reports of each drug by year (logarithmic axis). b, Route of
+administration of the reports of each drug (100% bars). c, Cells with a
+signal (at least 3 reports, lower limit of the 95% CI above 1, ROR of 2
+or more); the area of a dot and the number beside it are the reports. d,
+Share of the reports by time to the event. e, Median time to the event
+in days. ROR, reporting odds ratio. All data are simulated._
 
 - Panels **c**, **d** and **e** have the same rows, and only **c** names
-  them. The grid of small grey dots in **c** marks the cells that are
-  not signals, so that the matrix keeps the shape of the heat map beside
+  them. The pale tiles in **c** mark the cells that are not signals, so
+  that the matrix keeps the shape of the heat map beside it. The numbers
+  of **c** have no grid line behind them: a line behind a number crosses
   it.
+- The eight categories are written 1 to 8 under one axis title. Names
+  such as “Category 3”, tilted, touch each other in columns this narrow;
+  upright numbers never do.
 - Each legend is made once: `plot_layout(guides = "collect")` gathers
   them on the right, and a legend that two panels would repeat is
   switched off in one of them (`show.legend`), here the class colors of
@@ -357,23 +373,23 @@ event._
 
 ## 4. Figure 3: The Profile of the Events
 
-Three views of the same table. How many categories of each drug carry a
-signal, as bars. The ROR of every drug and category as a heat map, with
-the categories in the order of a hierarchical clustering and the tree
-above them; the largest ROR of each drug has a black frame. And, below,
-the largest ROR of each drug with its 95% CI on a logarithmic axis, with
-the name of its category. The drugs are in the same order, in the same
-classes, throughout.
+Three views of the same table. The reports of each drug, as bars, so
+that the size of the denominator is in view. The ROR of every drug and
+category as a heat map, with the categories in the order of a
+hierarchical clustering and the tree above them; the largest ROR of each
+drug has a black frame. And, below, the largest ROR of each drug with
+its 95% CI on a logarithmic axis, with the name of its category. The
+drugs are in the same order, in the same classes, throughout.
 
 ``` r
 cells$class_label <- factor(as.character(cells$group), class_levels, c("Class A", "Class B", "Class C", "No\nclass"))
 by_class <- facet_grid(rows = vars(class_label), scales = "free_y", space = "free_y", switch = "y")
 no_strip <- theme(strip.text.y = element_blank(), strip.text.y.left = element_blank())
 
-# a: the number of categories of each drug that carry a signal
-signals <- data.frame(drug = factor(drugs, drugs), n = as.vector(tapply(cells$signal, cells$drug, sum)))
-signals$group <- drug_group[as.character(signals$drug)]
-signals$class_label <- factor(as.character(signals$group), class_levels, c("Class A", "Class B", "Class C", "No\nclass"))
+# a: the reports of each drug, in thousands
+volume <- data.frame(drug = factor(drugs, drugs), thousand = n_reports / 1000)
+volume$group <- drug_group[as.character(volume$drug)]
+volume$class_label <- factor(as.character(volume$group), class_levels, c("Class A", "Class B", "Class C", "No\nclass"))
 
 # b: the categories in the order of a hierarchical clustering of their log ratios, and the tree
 log_ror <- tapply(log2(cells$ror), list(cells$drug, cells$event), identity)
@@ -397,34 +413,34 @@ top <- cells[ave(cells$ror, cells$drug, FUN = function(x) x == max(x)) == 1, ]  
 top$label <- sprintf("%s: %.1f (%.1f\u2013%.1f)", top$event, top$ror, top$lo, top$hi)
 
 panels_3 <- list(
-  A = ggplot(signals, aes(n, drug, fill = group)) +
+  A = ggplot(volume, aes(thousand, drug, fill = group)) +
     geom_col(width = 0.7) +
-    geom_text(aes(label = n), hjust = -0.5, size = small_text) +
+    geom_text(aes(label = sprintf("%.1f", thousand)), hjust = -0.25, size = tile_text) +
     by_class + scale_y_discrete(limits = rev) +
     scale_fill_manual(values = class_fill, guide = "none") +
-    scale_x_continuous(limits = c(0, max(signals$n) + 1), breaks = 0:max(signals$n), expand = expansion(0)) +
-    labs(x = "Categories with a signal", y = NULL) +
+    scale_x_continuous(breaks = c(0, 20, 40), expand = expansion(mult = c(0, 0.22))) +
+    labs(x = "Reports (thousands)", y = NULL) +
     figure_theme + strip_text +
     theme(strip.placement = "outside", strip.text.y.left = element_text(angle = 90)),
   B = ggplot(cells, aes(event_ordered, drug)) +
     geom_tile(aes(fill = log2(ror)), colour = "white", linewidth = 0.3) +
-    geom_text(aes(label = sprintf("%.1f", ror), fontface = ifelse(signal, "bold", "plain")), size = 5 / .pt) +
+    geom_text(aes(label = sprintf("%.1f", ror), fontface = ifelse(signal, "bold", "plain")), size = tile_text) +
     geom_tile(data = top, fill = NA, colour = "black", linewidth = 0.5) +
-    by_class + scale_y_discrete(limits = rev) + scale_x_discrete(expand = expansion(0)) +
+    by_class + scale_y_discrete(limits = rev) + scale_x_discrete(labels = category_number, expand = expansion(0)) +
     scale_fill_gradient2(low = direction[["low"]], mid = "white", high = direction[["high"]], midpoint = 0, limits = c(-3, 3), oob = scales::squish,
                          labels = function(x) minus(format(x)), name = "log2 ROR") +
-    labs(x = NULL, y = NULL) +
+    labs(x = "Category", y = NULL) +
     figure_theme + strip_text + no_strip +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
           axis.line = element_blank(), legend.position = "right", panel.spacing.y = unit(0.8, "mm")),
   C = ggplot(top, aes(ror, drug)) +
     geom_vline(xintercept = 1, linetype = "22", linewidth = 0.3, colour = "grey45") +
     geom_linerange(aes(xmin = lo, xmax = hi, colour = group), orientation = "y", linewidth = 0.5) +
     geom_point(aes(colour = group), size = 1.7) +
-    geom_text(aes(x = 120, label = label), hjust = 1, size = small_text, colour = "grey20") +
+    geom_text(aes(x = 40, label = label), hjust = 1, size = small_text, colour = "grey20") +
     scale_colour_manual(values = class_fill, guide = "none") +
     by_class + scale_y_discrete(limits = rev) +
-    scale_x_log10(limits = c(0.7, 120), breaks = c(1, 3, 10, 30), expand = expansion(0)) +
+    scale_x_log10(limits = c(0.7, 40), breaks = c(1, 3, 10, 30), expand = expansion(0)) +
     labs(x = "Largest reporting odds ratio of each drug (95% CI, log scale)", y = NULL) +
     figure_theme + strip_text +
     theme(strip.placement = "outside", strip.text.y.left = element_text(angle = 0, hjust = 1)),
@@ -437,11 +453,17 @@ panels_3 <- list(
 tag_panels(wrap_plots(panels_3, design = design_rows(list(c(S = 12, T = 22), c(A = 12, B = 22), c(C = 34))), heights = c(9, 70, 55)), 3)
 ```
 
-<img src="reporting-study_files/figure-gfm/figure_3-1.png" alt="A figure of three panels, a to c. Panel a has eleven short horizontal bars in four groups of rows, in the colors of the classes. Panel b is a heat map of the same rows and eight columns in blue and red, with a tree above the columns and a black frame around one tile in each row. Panel c has eleven dots on a logarithmic axis with horizontal lines through them, in the colors of the classes, and a category and a number at the right of each." width="100%" />
+<img src="reporting-study_files/figure-gfm/figure_3-1.png" alt="A figure of three panels, a to c. Panel a has eleven horizontal bars of different lengths in four groups of rows, in the colors of the classes, with a number at the end of each. Panel b is a heat map of the same rows and eight columns in blue and red, with a tree above the columns and a black frame around one tile in each row. Panel c has eleven dots on a logarithmic axis with horizontal lines through them, in the colors of the classes, and a category and a number at the right of each." width="100%" />
 
-_Figure 3. The profile of the events: the signals of each drug, a
-clustered heat map of the reporting odds ratios, and the largest ratio
-of each drug with its confidence interval._
+_Figure 3. Profile of the events of each drug. a, Reports of each drug in
+thousands. b, ROR of each drug and category on a log2 scale, with the
+categories in the order of a hierarchical clustering (average linkage on
+the log2 ROR); black frames mark the largest ROR of a drug, bold numbers
+the cells with a signal. c, The largest ROR of each drug with its 95% CI
+on a logarithmic axis. The ROR is (a/b)/(c/d) from the 2 x 2 table of a
+drug against all the other drugs, and its 95% CI is exp(log ROR +/- 1.96
+s), s = sqrt(1/a + 1/b + 1/c + 1/d). No correction for multiple
+comparisons. All data are simulated._
 
 - The tree is drawn from the result of `hclust()`: each merge is a “U”
   of three segments, and the leaves sit at 1 to 8, which are the centers
@@ -485,26 +507,29 @@ rel$firm <- (rel$lo_ratio > 1 & rel$ratio >= 1.5) | (rel$hi_ratio < 1 & rel$rati
 
 contrast <- ggplot(rel, aes(event, drug)) +
   geom_tile(aes(fill = log2(ratio)), colour = "white", linewidth = 0.3) +
-  geom_text(aes(label = sprintf("%.1f", ratio), fontface = ifelse(firm, "bold", "plain")), size = 5 / .pt) +
-  geom_point(aes(x = 0.2, colour = group), shape = 15, size = 3.6) +
+  geom_text(aes(label = sprintf("%.1f", ratio), fontface = ifelse(firm, "bold", "plain")), size = tile_text) +
+  geom_point(aes(x = 0.05, colour = group), shape = 15, size = 3.4) +
   facet_grid(rows = vars(group), scales = "free_y", space = "free_y") +
-  scale_y_discrete(limits = rev) + scale_x_discrete(position = "top", expand = expansion(add = c(0.6, 0))) +
+  scale_y_discrete(limits = rev) + scale_x_discrete(position = "top", labels = category_number, expand = expansion(add = c(1.3, 0))) +
   scale_fill_gradient2(low = direction[["low"]], mid = "white", high = direction[["high"]], midpoint = 0, limits = c(-3, 3), oob = scales::squish,
                        labels = function(x) minus(format(x)), name = "log2 ratio\nto Drug 1",
                        guide = guide_colourbar(order = 1, theme = theme(legend.key.height = unit(24, "mm"), legend.key.width = unit(2.4, "mm")))) +
   scale_colour_manual(values = class_fill, name = NULL, guide = guide_legend(order = 2, nrow = 1, override.aes = list(size = 2.6))) +
-  labs(x = NULL, y = NULL, caption = "Bold: the 95% CI of the ratio excludes 1 and the ratio is at least 1.5-fold either way.") +
+  labs(x = "Category", y = NULL, caption = "Bold: the 95% CI of the ratio excludes 1 and the ratio is at least 1.5-fold either way.") +
   figure_theme + strip_text +
-  theme(strip.text.y = element_blank(), axis.line = element_blank(), axis.ticks = element_blank(), panel.spacing.y = unit(0.8, "mm"),
-        axis.text.x.top = element_text(angle = 0), legend.position = "right", plot.caption = element_text(hjust = 0, size = 5.6))
+  theme(strip.text.y = element_blank(), axis.line = element_blank(), axis.ticks = element_blank(), panel.spacing.y = unit(0.8, "mm"), axis.text.y = element_text(margin = margin(r = 3)),
+        legend.position = "right", plot.caption = element_text(hjust = 0, size = 5.6))
 
 tag_panels(contrast, 1)
 ```
 
 <img src="reporting-study_files/figure-gfm/figure_4-1.png" alt="A heat map of ten rows in four groups and eight columns, in blue and red with a number in each tile, some in bold. A small square of a class color sits at the left of each row. A color bar is at the right and a legend of four class colors below it." width="100%" />
 
-_Figure 4. The ratio of the reporting odds ratio of each drug to that of
-a reference drug, for each category._
+_Figure 4. Contrast of each drug with a reference drug. The ratio of the
+ROR of each drug to that of Drug 1, for each category, on a log2 scale.
+Bold: the 95% CI of the ratio excludes 1 and the ratio is at least
+1.5-fold either way. The 95% CI of a ratio is exp(log ratio +/- 1.96 s),
+with s = sqrt(s1^2 + s2^2) from the two RORs. All data are simulated._
 
 - The class of a row is a point of `shape = 15` on the `colour`
   aesthetic, so that the `fill` of the tiles keeps its own scale and its
@@ -571,15 +596,18 @@ forest <- ggplot(estimates, aes(ror, row)) +
   labs(x = "Reporting odds ratio (95% CI, log scale)", y = NULL) +
   figure_theme + strip_text +
   theme(strip.placement = "outside", strip.text.y.left = element_text(angle = 0, hjust = 1), panel.spacing.y = unit(1.5, "mm"),
-        legend.position = "top", legend.justification = "left", panel.grid.major.y = element_line(colour = "grey94", linewidth = 0.25))
+        legend.position = "top", legend.justification = "left")
 
 tag_panels(forest, 1)
 ```
 
 <img src="reporting-study_files/figure-gfm/figure_5-1.png" alt="A forest plot of ten rows in five groups, with the group names at the left in bold. Each row has a dot with a short horizontal line on a logarithmic axis and a number at the right. The dots are filled, except for one that is open and lies near the dashed line at 1. The dots are green, orange, purple or grey." width="100%" />
 
-_Figure 5. Selected estimates: the reporting odds ratio of five drug and
-category pairs in the analysis of all the reports and in other analyses._
+_Figure 5. Selected estimates in other analyses. ROR with its 95% CI
+(logarithmic axis) of five pairs of a drug and a category, in the
+analysis of all the reports and in analyses that keep a part of the
+reports or change the comparator. Filled circle: the 95% CI excludes 1;
+open circle: it includes 1. All data are simulated._
 
 - The names of the analyses are the labels of the rows, and the names of
   the groups are the strips of the facets, placed on the left with
@@ -642,6 +670,18 @@ means a class in one figure should not mean a category in the next, so
 the categories are named, in the columns of the heat map and in the text
 of the forest plot, and the audit has nothing to warn about.
 
+What the audit cannot see: it reads the plots, not the picture. Text
+that sits on a line, labels that touch each other and text that crosses
+the edge of two panels are in the picture only. Save the figure as a PDF
+with `save_journal_figure()` and check the file at its own size, for the
+size of every glyph and for text that crosses a stroke or another text.
+Such a check finds what the audit passes: tilted category names that
+touch each other, grid lines behind the numbers of a bubble matrix or
+behind the values of a forest plot, labels at the ends of lines that
+overlap, and the white outline of a plot background that crosses text
+where two panels meet. The figures above are drawn to avoid each of
+them, and the last is in the theme of the set.
+
 ------------------------------------------------------------------------
 
 ## 8. Packages and Credits
@@ -664,3 +704,4 @@ Masataka Okabe and Kei Ito, as they are in base R.
 | Show the evidence of an estimate | a filled and an open circle, or bold numbers, from one rule on the CI |
 | Group the rows of a forest plot | `facet_grid(rows = , scales = "free_y", space = "free_y", switch = "y")` |
 | Check the whole set | `journal_audit(list("Figure 1" = panels_1, ...), "nature", column = "double")` |
+| Check what the audit cannot see | `save_journal_figure(fig, "figure.pdf", "nature", column = "double", height = 150)`, then a check of the PDF for text sizes and for text over strokes or other text |

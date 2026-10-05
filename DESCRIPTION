@@ -1,6 +1,6 @@
 Package: themeset
 Title: A Functional Approach to Applying 'ggplot2' Theme and Scale Sets
-Version: 1.8.3
+Version: 1.8.4
 Author: Lucas TRAN <tranhungydhcm@gmail.com>
 Maintainer: Lucas TRAN <tranhungydhcm@gmail.com>
 Description: Provides a simple, function-based interface for applying

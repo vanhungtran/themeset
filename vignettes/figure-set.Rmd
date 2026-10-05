@@ -80,7 +80,7 @@ okabe_ito <- journal_colors("cell")
 groups <- c("Control", "Treatment A", "Treatment B")
 group_colors <- c(Control = "grey72", `Treatment A` = okabe_ito[3], `Treatment B` = okabe_ito[6])
 verdict_colors <- c(reproduced = okabe_ito[5], `not reproduced` = "grey35")
-direction <- c(low = okabe_ito[5], mid = "white", high = "#B2182B")   # down is blue, up is red
+direction <- c(low = okabe_ito[5], mid = "white", high = "firebrick")   # down is blue, up is red
 free_colors <- okabe_ito[c(1, 2, 4, 7, 8)]                            # for the categories of no group
 
 # one theme for every panel, and the sizes that the panels share
