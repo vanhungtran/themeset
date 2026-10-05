@@ -1,3 +1,12 @@
+# themeset 1.8.7
+
+* The seven figures of "A Figure Set for a Reanalysis" are checked as PDF files,
+  like those of the reporting study, and now pass: the heat maps of the first figure
+  have no ticks under their columns, which crossed the stars and the "n/a" of the
+  last row; the names of the regulators in the fourth figure are placed by a small
+  function, `name_at()`, where no point lies under the text and no zero line crosses
+  it; and two names of runs in the fifth figure go to the left of their points.
+
 # themeset 1.8.6
 
 * In the fourth figure of "A Figure Set for a Reporting Study" the legend of the

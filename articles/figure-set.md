@@ -154,7 +154,8 @@ heat_map <- function(d, limit, title, fill_title, classes_named) {
                            legend.frame = element_blank()))) +
     labs(x = NULL, y = NULL, title = title) +
     figure_theme + strip_text +
-    theme(legend.position = "bottom", legend.justification = "left", axis.line = element_blank(), panel.spacing.y = unit(0.8, "mm"))
+    theme(legend.position = "bottom", legend.justification = "left", axis.line = element_blank(), axis.ticks.x = element_blank(),
+          axis.text.x = element_text(margin = margin(t = 2.5)), panel.spacing.y = unit(0.8, "mm"))
   if (classes_named) {
     p + theme(strip.text.y = element_blank())
   } else {
@@ -258,7 +259,9 @@ against the reanalysis._
   of the bands in place of the names of the classes, so the rows are
   read once.
 - A tile that cannot be tested is grey and says “n/a” in place of a
-  value.
+  value. The columns have no ticks under them: a tick is a stroke, and
+  the “n/a” and the stars of the last row sit just above it, so a check
+  of the PDF file finds a text that a stroke crosses.
 - The panels sit on a grid of 36 columns that `design_rows()` writes
   out, so that the top and the bottom row never share a column boundary:
   patchwork would otherwise pad one panel to match the axis labels of
@@ -626,9 +629,30 @@ panel_stats <- do.call(rbind, lapply(by_panel, function(d) {
              label = sprintf("\u03C1 = %.2f\nsame sign %.0f%%", cor(d$reference, d$reanalysis, method = "spearman"),
                              100 * mean(sign(d$reference) == sign(d$reanalysis))))
 }))
-# the regulator with the largest change in each direction is named, on the free side of its point
-named <- do.call(rbind, lapply(by_panel, function(d) d[c(which.max(d$reference), which.min(d$reference)), ]))
-named$side <- ifelse(named$reference > 0, 1.15, -0.15)
+# The regulator with the largest change in each direction is named. The name goes to the nearest of
+# sixteen places around its point (eight directions, near and far, outward from the cloud first)
+# where the text covers no point, does not cross a zero line and stays inside the panel. The size
+# of the text is a share of the panel, which spans the range of the data and `room` on each side.
+room <- 0.15
+name_at <- function(d, i, width = 0.13, height = 0.105) {
+  sx <- diff(range(d$reference)) * (1 + 2 * room); sy <- diff(range(d$reanalysis)) * (1 + 2 * room)
+  where <- expand.grid(dx = c(-1, 0, 1), dy = c(-1, 0, 1), far = 0:1)
+  where <- where[where$dx != 0 | where$dy != 0, ]
+  outward <- c(d$reference[i] - mean(d$reference), d$reanalysis[i] - mean(d$reanalysis)) / c(sx, sy)
+  where <- where[order(where$far, -(where$dx * outward[1] + where$dy * outward[2])), ]
+  x <- d$reference[i] + where$dx * (width / 2 + 0.03 + 0.09 * where$far) * sx
+  y <- d$reanalysis[i] + where$dy * (height / 2 + 0.05 + 0.09 * where$far) * sy
+  trouble <- vapply(seq_along(x), function(k) {
+    under <- sum(abs(d$reference - x[k]) < (width / 2 + 0.015) * sx & abs(d$reanalysis - y[k]) < (height / 2 + 0.03) * sy)
+    on_zero <- abs(x[k]) < width / 2 * sx | abs(y[k]) < height / 2 * sy
+    outside <- abs(x[k] - mean(range(d$reference))) + width / 2 * sx > sx / 2 |
+      abs(y[k] - mean(range(d$reanalysis))) + height / 2 * sy > sy / 2
+    under + 5 * on_zero + 5 * outside
+  }, numeric(1))
+  best <- which.min(trouble)
+  data.frame(d[i, ], x = x[best], y = y[best])
+}
+named <- do.call(rbind, lapply(by_panel, function(d) rbind(name_at(d, which.max(d$reference)), name_at(d, which.min(d$reference)))))
 
 # c: where the cells of a sub-cluster come from
 sample_names <- c("Control 1", "Control 2", "A 1", "A 2", "B 1", "B 2")
@@ -678,14 +702,14 @@ panels_4 <- list(
   B = ggplot(regulators, aes(reference, reanalysis, colour = comparison)) +
     geom_vline(xintercept = 0, colour = "grey80", linewidth = 0.3) + geom_hline(yintercept = 0, colour = "grey80", linewidth = 0.3) +
     geom_point(size = 0.9, alpha = 0.9) +
-    geom_text(data = named, aes(label = label, hjust = side), size = small_text, fontface = "italic", colour = "grey15",
-              nudge_y = 0.12) +
+    geom_text(data = named, aes(x = x, y = y, label = label), size = small_text, fontface = "italic", colour = "grey15") +
     geom_text(data = panel_stats, aes(x = Inf, y = -Inf, label = label), inherit.aes = FALSE, hjust = 1.05, vjust = -0.2,
               size = small_text, lineheight = 0.95) +
     facet_grid(rows = vars(comparison), cols = vars(type), scales = "free", switch = "y",
                labeller = labeller(comparison = c("Treatment A" = "A", "Treatment B" = "B"))) +
     scale_colour_manual(values = group_colors[comparisons], guide = "none") +
-    scale_x_continuous(labels = function(x) minus(format(x))) + scale_y_continuous(labels = function(x) minus(format(x))) +
+    scale_x_continuous(labels = function(x) minus(format(x)), expand = expansion(mult = room)) +
+    scale_y_continuous(labels = function(x) minus(format(x)), expand = expansion(mult = room)) +
     labs(x = "Reference change in regulator activity", y = "Reanalysis change in regulator activity",
          title = "Regulators of the reference list") +
     figure_theme + strip_text +
@@ -726,6 +750,13 @@ embedding of the sub-clusters and the make-up of each group._
   and sits under panels **d** and **e**, which have none of their own.
 - In panel **c** the white lines cut each bar into its samples: the bars
   are `geom_col()` with `group = sample`, and a color for each group.
+- The names of the regulators in panel **b** are not nudged by a fixed
+  amount: a small function, `name_at()`, tries sixteen places around the
+  point (eight directions, near and far), outward from the cloud first,
+  and keeps the nearest where no point lies under the text, no zero line
+  crosses it and it stays in the panel. A name that sits on a point or
+  on a line is found by a check of the PDF file as a text that a stroke
+  crosses.
 
 ------------------------------------------------------------------------
 
@@ -755,6 +786,7 @@ runs <- data.frame(
 
 # b: the principal components of the runs that are kept
 components <- data.frame(runs[1:11, c("run", "group")], PC1 = rnorm(11, 0, 40), PC2 = rnorm(11, 0, 35))
+components$side <- ifelse(components$run %in% c("Run 3", "Run 8"), -1, 1)     # a name goes to the left when a point of another run lies on its right
 
 # c: every way of leaving out three runs, from the best agreement down
 leave_out <- data.frame(rank = 1:364)
@@ -803,7 +835,7 @@ panels_5 <- list(
           legend.text = element_text(size = 6), legend.key.size = unit(3, "mm"), legend.margin = margin(0, 0, 0, 0)),
   B = ggplot(components, aes(PC1, PC2, fill = group)) +
     geom_point(shape = 21, colour = "white", size = 2.2, stroke = 0.3) +
-    geom_text(aes(label = run), size = small_text, colour = "grey20", hjust = 0, nudge_x = 4, check_overlap = TRUE) +
+    geom_text(aes(x = PC1 + 4 * side, label = run, hjust = (1 - side) / 2), size = small_text, colour = "grey20") +
     scale_fill_manual(values = group_colors, guide = "none") +
     scale_x_continuous(labels = function(x) minus(format(x)), expand = expansion(mult = c(0.05, 0.15))) +
     scale_y_continuous(labels = function(x) minus(format(x))) +
@@ -861,9 +893,10 @@ reanalysis._
   made, and it is blue because it is the one result that the reanalysis
   reproduced.
 - The labels of panel **b** sit to the right of their points, with room
-  for them on the axis: with simulated points that never touch,
-  `check_overlap = TRUE` is enough, but a figure of real data may want
-  the ggrepel package.
+  for them on the axis, except two, Run 3 and Run 8, which go to the
+  left because a point of another run lies on their right. With many
+  labels, a figure may want the ggrepel package, which finds the places
+  by itself.
 
 ------------------------------------------------------------------------
 
