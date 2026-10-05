@@ -53,8 +53,8 @@ Themes](global-and-custom-themes.md), [A Multi-Panel
 Figure](multi-panel-figure.md), [Comparing Figures Across
 Journals](journal-figures.md), [A Gallery of Figure
 Types](figure-gallery.md), [A Showcase of Themes and
-Colors](showcase.md) and [A Figure Set for a
-Reanalysis](figure-set.md).
+Colors](showcase.md), [A Figure Set for a Reanalysis](figure-set.md)
+and [A Figure Set for a Reporting Study](reporting-study.md).
 
 ### Example Data
 

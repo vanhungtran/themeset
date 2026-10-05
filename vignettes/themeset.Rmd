@@ -63,8 +63,9 @@ This vignette is a short tour. The other articles go deeper:
 [A Multi-Panel Figure](multi-panel-figure.html),
 [Comparing Figures Across Journals](journal-figures.html),
 [A Gallery of Figure Types](figure-gallery.html),
-[A Showcase of Themes and Colors](showcase.html) and
-[A Figure Set for a Reanalysis](figure-set.html).
+[A Showcase of Themes and Colors](showcase.html),
+[A Figure Set for a Reanalysis](figure-set.html) and
+[A Figure Set for a Reporting Study](reporting-study.html).
 
 ### Example Data
 

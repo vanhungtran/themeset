@@ -149,6 +149,12 @@ maps, an atlas of cells, a comparison of a reference with its
 reanalysis, quality control, a scorecard and images. All of them share
 one color contract, and `journal_audit()` checks the set at the end.
 
+A [second figure
+set](https://vanhungtran.github.io/themeset/articles/reporting-study.html)
+is for a study of reports of drugs and events: a flow chart, a bubble
+matrix, a heat map with a tree, a contrast with a reference and a
+grouped forest plot, also from simulated data.
+
 ## Documentation
 
 Tutorials and the function reference are on the package website,
@@ -172,6 +178,8 @@ Tutorials and the function reference are on the package website,
   Colors](https://vanhungtran.github.io/themeset/articles/showcase.html)
 - [A Figure Set for a
   Reanalysis](https://vanhungtran.github.io/themeset/articles/figure-set.html)
+- [A Figure Set for a Reporting
+  Study](https://vanhungtran.github.io/themeset/articles/reporting-study.html)
 
 The same articles, with their figures, are in the repository as
 Markdown, for reading on GitHub: [articles/](articles/).

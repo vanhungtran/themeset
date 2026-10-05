@@ -51,7 +51,9 @@ Gene 1 to Gene 10, and every number is made up. What they share is a **color
 contract**, written down once in the first section, and the style of a journal,
 `journal_theme("nature")`: 183 mm wide, 7 pt text, 5.6 pt tick labels, panels
 tagged a, b, c. At the end `journal_audit()` checks the whole set: each figure
-against the limits of the journal, and the figures against each other.
+against the limits of the journal, and the figures against each other. A second
+set, for a study of reports of drugs and events, is in
+[A Figure Set for a Reporting Study](reporting-study.html).
 
 ---
 

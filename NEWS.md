@@ -1,3 +1,14 @@
+# themeset 1.8.3
+
+* A new article, "A Figure Set for a Reporting Study", draws five figures from
+  simulated data for a study of reports of drugs and events: a flow chart of the
+  cases, reports with routes, a bubble matrix and time to the event, a heat map
+  of reporting odds ratios with a hierarchical tree, a contrast with a reference
+  drug, and a forest plot of grouped estimates. The reporting odds ratios and
+  their confidence intervals are computed from the simulated counts. The figures
+  share one color contract and pass `journal_audit()` for Nature. The panels are
+  laid out with patchwork, which is suggested.
+
 # themeset 1.8.2
 
 ## Fixes
