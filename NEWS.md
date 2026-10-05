@@ -1,15 +1,24 @@
+# themeset 1.8.6
+
+* In the fourth figure of "A Figure Set for a Reporting Study" the legend of the
+  classes is below the heat map, at the left and in line with the caption, and the
+  color bar stays at the right: each guide has its own `position`.
+* The second figure of that article had two colors that readers with tritanopia
+  could hardly tell apart (a route and a class, 6.6 apart in CIEDE2000; the limit
+  of `journal_audit()` is 10), and the audit warned about it. The three routes are
+  now an oat, a sand and a khaki, at least 10 apart from each other and from the
+  colors of the classes, and both articles on figure sets pass the audit.
+
 # themeset 1.8.5
 
 * The two articles on figure sets have new colors, made with `hcl()` of base R from
   a hue, a chroma and a lightness: a deep teal, an orchid and a gold for groups, a
   steel blue and a brick red for the two directions of a heat map, a gold, an
   olive, a rose, a brown and a light steel for the categories that belong to no
-  group, a blush, a dusty rose and a rosy taupe for routes, and one cool slate for
-  ordered quantities. The group colors are at least 16 apart (CIEDE2000) with
-  normal vision and with each kind of color-vision deficiency, no two colors of a
-  panel are closer than 10, which is the limit of `journal_audit()`, and both
-  articles pass it. The flow chart has pale shadows, the heat maps of the second
-  article have white numbers on their deep tiles, and the plots of the first have a
+  group, and one cool slate for ordered quantities. The group colors are at least
+  16 apart (CIEDE2000) with normal vision and with each kind of color-vision
+  deficiency. The flow chart has pale shadows, the heat maps of the second article
+  have white numbers on their deep tiles, and the plots of the first have a
   background without an outline.
 
 # themeset 1.8.4

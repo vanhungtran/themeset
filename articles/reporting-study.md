@@ -71,9 +71,9 @@ Every figure takes its colors from the contract:
   than readers with color-vision deficiency can keep apart (see Section
   7), so they are the labels of the columns and are named in the text of
   the figures. Everything else is neutral: the three routes of Figure 2
-  are a blush, a dusty rose and a rosy taupe, and the ordered quantities
-  (the bins of time, the median days, the boxes of the flow chart) are
-  steps of one cool slate.
+  are an oat, a sand and a khaki, and the ordered quantities (the bins
+  of time, the median days, the boxes of the flow chart) are steps of
+  one cool slate.
 
 A group keeps its color across the figures, and no figure gives one
 color two meanings.
@@ -275,7 +275,7 @@ rows, so that a drug is read across the three.
 
 ``` r
 set.seed(21)
-route_colors <- setNames(hcl(20, c(10, 16, 30), c(93, 76, 62)), c("Route 1", "Route 2", "Route 3"))     # blush, dusty rose, rosy taupe
+route_colors <- setNames(hcl(60, c(8, 24, 26), c(93, 78, 64)), c("Route 1", "Route 2", "Route 3"))     # oat, sand, khaki
 bins <- c("\u226430 d", "31\u2013180 d", ">180 d")
 axis_drugs <- scale_y_discrete(limits = rev(drugs))
 
@@ -530,17 +530,17 @@ contrast <- ggplot(rel, aes(event, drug)) +
   scale_y_discrete(limits = rev) + scale_x_discrete(position = "top", labels = category_number, expand = expansion(add = c(1.3, 0))) +
   scale_fill_gradientn(colours = direction, limits = c(-3, 3), oob = scales::squish,
                        labels = function(x) minus(format(x)), name = "log2 ratio\nto Drug 1",
-                       guide = guide_colourbar(order = 1, theme = theme(legend.key.height = unit(24, "mm"), legend.key.width = unit(2.4, "mm")))) +
-  scale_colour_manual(values = class_fill, name = NULL, guide = guide_legend(order = 2, nrow = 1, override.aes = list(size = 2.6))) +
+                       guide = guide_colourbar(position = "right", theme = theme(legend.key.height = unit(24, "mm"), legend.key.width = unit(2.4, "mm")))) +
+  scale_colour_manual(values = class_fill, name = NULL, guide = guide_legend(position = "bottom", nrow = 1, override.aes = list(size = 2.6))) +
   labs(x = "Category", y = NULL, caption = "Bold: the 95% CI of the ratio excludes 1 and the ratio is at least 1.5-fold either way.") +
   figure_theme + strip_text +
   theme(strip.text.y = element_blank(), axis.line = element_blank(), axis.ticks = element_blank(), panel.spacing.y = unit(0.8, "mm"), axis.text.y = element_text(margin = margin(r = 3)),
-        legend.position = "right", plot.caption = element_text(hjust = 0, size = 5.6))
+        legend.justification.bottom = "left", legend.margin = margin(t = 2), plot.caption = element_text(hjust = 0, size = 5.6))
 
 tag_panels(contrast, 1)
 ```
 
-<img src="reporting-study_files/figure-gfm/figure_4-1.png" alt="A heat map of ten rows in four groups and eight columns, in blue and red with a number in each tile, some in bold. A small square of a class color sits at the left of each row. A color bar is at the right and a legend of four class colors below it." width="100%" />
+<img src="reporting-study_files/figure-gfm/figure_4-1.png" alt="A heat map of ten rows in four groups and eight columns, in blue and red with a number in each tile, some in bold. A small square of a class color sits at the left of each row. A color bar is at the right of the heat map and a legend of the four class colors is below it, at the left." width="100%" />
 
 _Figure 4. Contrast of each drug with a reference drug. The ratio of the
 ROR of each drug to that of Drug 1, for each category, on a log2 scale.
@@ -554,9 +554,11 @@ with s = sqrt(s1^2 + s2^2) from the two RORs. All data are simulated._
   a second.
 - The caption at the bottom says what bold means; it is part of the
   plot, so that it travels with the figure.
-- The color bar and the legend of the classes are two guides with an
-  `order`, which stacks them in the right margin; the length of the bar
-  is set with `theme()` inside `guide_colourbar()`.
+- Each guide has its own place: the color bar stays in the right margin,
+  and the legend of the classes goes below the heat map, with the
+  `position` argument of `guide_legend()`. `legend.justification.bottom`
+  puts it at the left, in line with the caption under it. The length of
+  the bar is set with `theme()` inside `guide_colourbar()`.
 
 ------------------------------------------------------------------------
 
@@ -653,10 +655,10 @@ figures <- list(
   "Figure 5" = list(A = forest)
 )
 journal_audit(figures, "nature", column = "double")
-#> Audit of 5 figure(s) for Nature: warn
+#> Audit of 5 figure(s) for Nature: pass
 #> figure    check         status  value            limit                    note
 #> Figure 1  journal       pass    all checks pass  Nature                   
-#> Figure 2  colors        warn    6.6              >= 10 (CIEDE2000)        up to 6 colors; closest pair with tritan vision; a panel with a gradient or many colors is not compared; palette = "okabe_ito" is made for this
+#> Figure 2  journal       pass    all checks pass  Nature                   
 #> Figure 3  journal       pass    all checks pass  Nature                   
 #> Figure 4  journal       pass    all checks pass  Nature                   
 #> Figure 5  journal       pass    all checks pass  Nature                   
