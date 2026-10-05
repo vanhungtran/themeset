@@ -1141,9 +1141,10 @@ color, the table would name the group and the colors.
 The figures are drawn with ggplot2 and laid out with patchwork (Thomas Lin
 Pedersen), which `themeset` suggests, not requires. The legend of Figure 4 is
 taken with cowplot (Claus O. Wilke). The colors are made with `hcl()` of base R,
-which builds a color from its hue, chroma and lightness; the two group colors and
-the blue were chosen for a large distance between them in CIEDE2000 with normal
-vision and with the three kinds of color-vision deficiency.
+which builds a color from its hue, chroma and lightness. The two group colors are
+at least 17 apart in CIEDE2000 with normal vision and with each of the three kinds
+of color-vision deficiency, and the five colors of the categories are at least 20
+apart.
 
 ---
 

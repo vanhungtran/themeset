@@ -356,7 +356,7 @@ tag_panels(wrap_plots(panels_2, design = design_rows(list(c(A = 20, B = 16), c(C
   right, and a legend that two panels would repeat is switched off in one of them
   (`show.legend`), here the class colors of **c**, which **a** already shows.
 - The labels at the end of the lines of **a** are spaced on the logarithmic scale
-  by a loop, at least 0.1 apart, so that no ggrepel package is needed.
+  by a loop, at least 0.12 apart, so that no ggrepel package is needed.
 - The squares of the class colors in **b** are points drawn at a position just
   left of the bars, with `show.legend = FALSE` and a scale without a guide.
 

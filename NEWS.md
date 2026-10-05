@@ -5,10 +5,11 @@
   steel blue and a brick red for the two directions of a heat map, a gold, an
   olive, a rose, a brown and a light steel for the categories that belong to no
   group, a blush, a dusty rose and a rosy taupe for routes, and one cool slate for
-  ordered quantities. The colors of one set stay at least 16 apart (CIEDE2000) with
-  normal vision and with each kind of color-vision deficiency, and both articles
-  pass `journal_audit()`. The flow chart has pale shadows, the heat maps have white
-  numbers on their deep tiles, and the plots in the first article have a
+  ordered quantities. The group colors are at least 16 apart (CIEDE2000) with
+  normal vision and with each kind of color-vision deficiency, no two colors of a
+  panel are closer than 10, which is the limit of `journal_audit()`, and both
+  articles pass it. The flow chart has pale shadows, the heat maps of the second
+  article have white numbers on their deep tiles, and the plots of the first have a
   background without an outline.
 
 # themeset 1.8.4
@@ -19,8 +20,6 @@
   as upright numbers, and a plot background without an outline. Each figure has a
   full legend: a title sentence, a clause for each panel and the definitions. The
   third figure shows the reports of each drug in place of the number of signals.
-* The heat maps of the two articles on figure sets use the named color
-  `"firebrick"` for values above the reference.
 
 # themeset 1.8.3
 
