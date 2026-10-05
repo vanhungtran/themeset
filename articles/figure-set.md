@@ -52,31 +52,40 @@ Reporting Study](reporting-study.md).
 
 Every figure of the set takes its colors from this section.
 
-- **Group**: Control is a light grey, Treatment A a bluish green and
-  Treatment B a vermillion, two colors of the Okabe-Ito palette that
-  readers with color-vision deficiency can tell apart.
-- **Verdict**: a result of the reanalysis is *reproduced*, in blue, or
-  *not reproduced*, in dark grey.
-- **Direction**: down is blue and up is red, on a ramp that passes
-  through white at zero. No group is blue or red, so a heat map is never
-  read as a group.
+- **Group**: Control is a light grey, Treatment A a deep teal and
+  Treatment B an orchid, two colors that readers with color-vision
+  deficiency can tell apart.
+- **Verdict**: a result of the reanalysis is *reproduced*, in a steel
+  blue, or *not reproduced*, in dark grey.
+- **Direction**: down is a steel blue and up is a brick red, on a ramp
+  that passes through white at zero. No group is blue or red, so a heat
+  map is never read as a group.
 - **Categories** that belong to no group, the types of cells and their
-  sub-clusters, take the Okabe-Ito colors that the groups and the
-  verdict have not taken.
+  sub-clusters, take five colors of other hues: a gold, an olive, a
+  rose, a brown and a light steel.
+- **Ordered quantities**, the steps of the cells that are kept and the
+  relative expression of a gene, are steps of one cool slate.
 
 ``` r
 library(patchwork)
 
-okabe_ito <- journal_colors("cell")
-
+# the colors are made with hcl() of base R, from a hue, a chroma and a lightness
 groups <- c("Control", "Treatment A", "Treatment B")
-group_colors <- c(Control = "grey72", `Treatment A` = okabe_ito[3], `Treatment B` = okabe_ito[6])
-verdict_colors <- c(reproduced = okabe_ito[5], `not reproduced` = "grey35")
-direction <- c(low = okabe_ito[5], mid = "white", high = "firebrick")   # down is blue, up is red
-free_colors <- okabe_ito[c(1, 2, 4, 7, 8)]                            # for the categories of no group
+group_colors <- c(Control = grey(0.72), `Treatment A` = hcl(176, 46, 44), `Treatment B` = hcl(296, 54, 52))
+
+# a ramp from white to a deep end: the chroma grows and the lightness falls together
+from_white <- function(hue, chroma, lightness, n = 6) {
+  s <- seq(0, 1, length.out = n)^0.9
+  hcl(hue, chroma * s, 97 - (97 - lightness) * s)
+}
+direction <- c(rev(from_white(245, 54, 42)), from_white(14, 68, 44)[-1])     # down is blue, white at zero, up is red
+verdict_colors <- c(reproduced = hcl(245, 54, 42), `not reproduced` = grey(0.35))
+free_colors <- hcl(c(70, 100, 348, 54, 234), c(88, 48, 53, 37, 34), c(76, 52, 54, 28, 74))   # gold, olive, rose, brown, light steel
+slate <- function(chroma, lightness) hcl(250, chroma, lightness)         # the cool neutral of ordered quantities
 
 # one theme for every panel, and the sizes that the panels share
-figure_theme <- journal_theme("nature")
+figure_theme <- journal_theme("nature") +
+  theme(plot.background = element_rect(fill = "white", colour = NA))   # no outline: it is a stroked path that crosses text where panels meet
 small_text <- 5.5 / .pt                       # annotations are 5.5 pt (geom_text sizes are in mm)
 strip_text <- theme(strip.background = element_blank(), strip.text = element_text(face = "bold"))
 tag_theme <- theme(plot.tag = element_text(size = 8, face = "bold"))
@@ -136,7 +145,7 @@ heat_map <- function(d, limit, title, fill_title, classes_named) {
     facet_grid(rows = vars(band), scales = "free_y", space = "free_y") +
     scale_y_discrete(limits = rev, expand = c(0, 0)) +
     scale_x_discrete(expand = c(0, 0), labels = c("A", "B")) +
-    scale_fill_gradient2(low = direction[["low"]], mid = direction[["mid"]], high = direction[["high"]], midpoint = 0,
+    scale_fill_gradientn(colours = direction,
                          limits = c(-limit, limit), oob = scales::squish, na.value = "grey95",
                          breaks = c(-limit, 0, limit), labels = function(x) minus(format(x)), name = fill_title,
                          guide = guide_colourbar(theme = theme(
@@ -238,7 +247,7 @@ tag_panels(wrap_plots(panels_1, design = design_rows(list(c(A = 11, B = 11, C = 
                       heights = c(1, 0.46)), 5)
 ```
 
-<img src="figure-set_files/figure-gfm/figure_1-1.png" alt="A figure of five panels, a to e. Panels a and b are heat maps of 19 rows in four bands, in blue and red, with stars on some tiles. Panel c has three box plots with the samples as dots, in three colors. Panel d has dots for the species of the three classes. Panel e has seven horizontal lines that end in a dot, in blue or grey." width="100%" />
+<img src="figure-set_files/figure-gfm/figure_1-1.png" alt="A figure of five panels, a to e. Panels a and b are heat maps of 19 rows in four bands, in steel blue and brick red, with stars on some tiles. Panel c has three box plots with the samples as dots, in three colors. Panel d has dots for the species of the three classes. Panel e has seven horizontal lines that end in a dot, in steel blue or dark grey." width="100%" />
 
 _Figure 1. Two heat maps on shared rows, the samples of three classes,
 the species of those classes, and the statements of the reference
@@ -334,7 +343,7 @@ annotated <- as.vector(table(cells$sample))
 flow <- data.frame(sample = factor(rep(sample_names, 4), rev(sample_names)), step = factor(rep(names(steps), each = 6), names(steps)),
                    n = c(annotated / 0.62, annotated / 0.62 * 0.86, annotated / 0.62 * 0.78, annotated) / 1000)
 flow_cut <- data.frame(sample = factor(sample_names, rev(sample_names)), n = annotated / 0.62 * runif(6, 0.45, 0.7) / 1000)
-greys <- setNames(grey(c(0.86, 0.70, 0.52, 0.26)), names(steps))
+greys <- setNames(slate(c(8, 14, 24, 32), c(88, 72, 50, 28)), names(steps))
 
 panels_2 <- list(
   A = ggplot(cells, aes(UMAP1, UMAP2, colour = type)) +
@@ -348,7 +357,7 @@ panels_2 <- list(
           legend.text = element_text(size = 6), legend.margin = margin(0, 0, 0, 0)),
   B = ggplot(dots, aes(type, gene)) +
     geom_point(aes(size = share * 100, fill = relative), shape = 21, colour = "grey25", stroke = 0.25) +
-    scale_fill_gradientn(colours = journal_ramp("cell", 3, color = 5, light = 0.9), limits = c(0, 1), breaks = c(0, 0.5, 1),
+    scale_fill_gradientn(colours = slate(c(10, 18, 38), c(95, 74, 30)), limits = c(0, 1), breaks = c(0, 0.5, 1),
                          name = "Expression\n(relative)",
                          guide = guide_colourbar(order = 1, theme = theme(
                            legend.key.width = unit(2.2, "mm"), legend.key.height = unit(14, "mm"),
@@ -381,7 +390,7 @@ panels_2 <- list(
     geom_line(linewidth = 0.4, colour = "grey20", alpha = 0.85) +
     geom_point(data = other_cut, shape = 23, size = 1.5, fill = "white", colour = "black", stroke = 0.3) +
     annotate("text", x = 1.3, y = 420, label = "300 UMI: cells called", hjust = 0, vjust = 0, size = small_text) +
-    annotate("text", x = 2e4, y = 170, label = "ambient", hjust = 0, vjust = 1, size = small_text) +
+    annotate("text", x = 1.3, y = 58, label = "below the line: ambient", hjust = 0, vjust = 1, size = small_text) +
     annotate("text", x = 1.3, y = 200, label = "diamonds: the other cut", hjust = 0, vjust = 1, size = small_text) +
     scale_x_log10(breaks = 10^(0:5), labels = c("1", "10", "100", "1k", "10k", "100k"), expand = expansion(mult = c(0.01, 0.02))) +
     scale_y_log10(breaks = 10^(1:5), labels = c("10", "100", "1k", "10k", "100k")) +
@@ -406,7 +415,7 @@ tag_panels(wrap_plots(panels_2, design = design_rows(list(c(A = 9, B = 12), c(C 
                       heights = c(88, 40, 40)), 6)
 ```
 
-<img src="figure-set_files/figure-gfm/figure_2-1.png" alt="A figure of six panels, a to f. Panel a is a scatter plot of cells in five colors, in clusters. Panel b is a dot plot of ten genes in five types, with one pair of large dark dots for each type. Panel c repeats the scatter plot in three small panels. Panel d has six stacked bars. Panel e has six falling curves on logarithmic axes. Panel f has six horizontal bars made of four shades of grey." width="100%" />
+<img src="figure-set_files/figure-gfm/figure_2-1.png" alt="A figure of six panels, a to f. Panel a is a scatter plot of cells in five colors, in clusters. Panel b is a dot plot of ten genes in five types, with one pair of large dark dots for each type. Panel c repeats the scatter plot in three small panels. Panel d has six stacked bars. Panel e has six falling curves on logarithmic axes. Panel f has six horizontal bars made of four shades of slate." width="100%" />
 
 _Figure 2. An atlas of five types of cells in six samples: the embedding,
 marker genes, the embedding by group, the make-up of each sample,
@@ -559,7 +568,7 @@ design <- paste(design_rows(list(c(A = 7, B = 5, C = 9))), paste0("#", design_ro
 tag_panels(wrap_plots(panels_3, design = design, heights = c(70, 62)), 5)
 ```
 
-<img src="figure-set_files/figure-gfm/figure_3-1.png" alt="A figure of five panels, a to e. Panel a has pairs of dots joined by lines, in five groups. Panel b has horizontal lines that end in a dot, green and orange, with a count at the right of each. Panel c is like panel b for pathway terms. Panel d is a grid of six scatter plots with points along a diagonal. Panel e has two histograms that fall from left to right, with two vertical lines." width="100%" />
+<img src="figure-set_files/figure-gfm/figure_3-1.png" alt="A figure of five panels, a to e. Panel a has pairs of dots joined by lines, in five groups. Panel b has horizontal lines that end in a dot, teal and orchid, with a count at the right of each. Panel c is like panel b for pathway terms. Panel d is a grid of six scatter plots with points along a diagonal. Panel e has two histograms that fall from left to right, with two vertical lines." width="100%" />
 
 _Figure 3. The reference and the reanalysis: counts of genes, the share
 recovered, the share of pathway terms recovered, agreement of the log2
@@ -569,8 +578,7 @@ fold changes, and the sizes of the changes against two cut-offs._
   shares line up across the page: the strips of **a** name the types,
   and **b** has none.
 - The row of a dumbbell is the same as the row of its lollipop, with the
-  same group color as everywhere in the set: A is green, B is
-  vermillion.
+  same group color as everywhere in the set: A is teal, B is orchid.
 - The identity line of each scatter plot is drawn corner to corner with
   `geom_line()`, not with `geom_abline()`, which runs past the edge of
   the panel in a free scale.
@@ -708,7 +716,7 @@ tag_panels(wrap_plots(c(panels_4, list(L = wrap_elements(full = legend_clusters,
                       heights = c(100, 70, 8)), 5)
 ```
 
-<img src="figure-set_files/figure-gfm/figure_4-1.png" alt="A figure of five panels, a to e, and a legend. Panel a has dots in four columns with a black diamond in each. Panel b is a grid of four scatter plots with points along a rising line, and a few labels. Panel c has five horizontal stacked bars in grey, green and orange. Panel d is a scatter plot of five small clouds in five colors. Panel e has three stacked bars in the same five colors." width="100%" />
+<img src="figure-set_files/figure-gfm/figure_4-1.png" alt="A figure of five panels, a to e, and a legend. Panel a has dots in four columns with a black diamond in each. Panel b is a grid of four scatter plots with points along a rising line, and a few labels. Panel c has five horizontal stacked bars in grey, teal and orchid. Panel d is a scatter plot of five small clouds in five colors. Panel e has three stacked bars in the same five colors." width="100%" />
 
 _Figure 4. A mechanism: scores of gene sets, regulators in the reference
 and in the reanalysis, the origin of the cells of each sub-cluster, an
@@ -824,7 +832,7 @@ panels_5 <- list(
     figure_theme + strip_text + theme(panel.spacing = unit(1.2, "mm"), strip.text.y.right = element_text(angle = 270)),
   E = ggplot(listed, aes(published, difference, fill = comparison)) +
     geom_hline(yintercept = 0, colour = "grey85", linewidth = 0.3) +
-    geom_abline(slope = 1, intercept = 0, colour = "grey50", linewidth = 0.3) +
+    annotate("segment", x = 0, y = 0, xend = 3.2, yend = 3.2, colour = "grey50", linewidth = 0.3) +
     geom_point(shape = 21, colour = "white", stroke = 0.15, size = 1.3, alpha = 0.9) +
     geom_text(data = fit, aes(x = Inf, y = -Inf, label = text), inherit.aes = FALSE, hjust = 1.08, vjust = -0.2,
               size = small_text, lineheight = 0.95) +
@@ -839,7 +847,7 @@ tag_panels(wrap_plots(panels_5, design = paste(design_rows(list(c(A = 12, B = 12
                       heights = c(0.8, 1.2)), 5)
 ```
 
-<img src="figure-set_files/figure-gfm/figure_5-1.png" alt="A figure of five panels, a to e. Panel a has 14 vertical bars in grey, green and orange, the last three paler. Panel b is a scatter plot of 11 labeled points. Panel c is a falling curve of grey dots with one blue dot at the top left. Panel d is a grid of four volcano plots with colored points on the right side. Panel e is a grid of four scatter plots with a diagonal line." width="100%" />
+<img src="figure-set_files/figure-gfm/figure_5-1.png" alt="A figure of five panels, a to e. Panel a has 14 vertical bars in grey, teal and orchid, the last three paler. Panel b is a scatter plot of 11 labeled points. Panel c is a falling curve of grey dots with one steel blue dot at the top left. Panel d is a grid of four volcano plots with colored points on the right side. Panel e is a grid of four scatter plots with a diagonal line." width="100%" />
 
 _Figure 5. Quality control and proteins: the identifications of every
 run, the principal components of the runs kept, the ranking of the
@@ -999,7 +1007,7 @@ ggplot() +
         legend.text = element_text(size = 6.2), legend.key.size = unit(3, "mm"))
 ```
 
-<img src="figure-set_files/figure-gfm/figure_6-1.png" alt="A table in four blocks of rows, with a colored dot at the start of every row: dark blue, pale blue, dark grey or an open circle. The columns give the quantity, what the reference reports and what the reanalysis gives." width="100%" />
+<img src="figure-set_files/figure-gfm/figure_6-1.png" alt="A table in four blocks of rows, with a colored dot at the start of every row: steel blue, pale blue, dark grey or an open circle. The columns give the quantity, what the reference reports and what the reanalysis gives." width="100%" />
 
 _Figure 6. A scorecard: for every quantity of the reference, what it
 reports, what the reanalysis gives, and the verdict._
@@ -1194,10 +1202,11 @@ group and the colors.
 
 The figures are drawn with ggplot2 and laid out with patchwork (Thomas
 Lin Pedersen), which `themeset` suggests, not requires. The legend of
-Figure 4 is taken with cowplot (Claus O. Wilke). The palettes are those
-of base R, the Okabe-Ito colors of Masataka Okabe and Kei Ito, and the
-ramps are made by `journal_ramp()`; see [Comparing Figures Across
-Journals](journal-figures.md) for their credits.
+Figure 4 is taken with cowplot (Claus O. Wilke). The colors are made
+with `hcl()` of base R, which builds a color from its hue, chroma and
+lightness; the two group colors and the blue were chosen for a large
+distance between them in CIEDE2000 with normal vision and with the three
+kinds of color-vision deficiency.
 
 ------------------------------------------------------------------------
 

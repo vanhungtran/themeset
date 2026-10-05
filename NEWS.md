@@ -1,3 +1,16 @@
+# themeset 1.8.5
+
+* The two articles on figure sets have new colors, made with `hcl()` of base R from
+  a hue, a chroma and a lightness: a deep teal, an orchid and a gold for groups, a
+  steel blue and a brick red for the two directions of a heat map, a gold, an
+  olive, a rose, a brown and a light steel for the categories that belong to no
+  group, a blush, a dusty rose and a rosy taupe for routes, and one cool slate for
+  ordered quantities. The colors of one set stay at least 16 apart (CIEDE2000) with
+  normal vision and with each kind of color-vision deficiency, and both articles
+  pass `journal_audit()`. The flow chart has pale shadows, the heat maps have white
+  numbers on their deep tiles, and the plots in the first article have a
+  background without an outline.
+
 # themeset 1.8.4
 
 * The figures of "A Figure Set for a Reporting Study" are checked as PDF files,

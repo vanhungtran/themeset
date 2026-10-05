@@ -57,21 +57,23 @@ than with the others, which is a signal, and not a risk.
 
 Every figure takes its colors from the contract:
 
-- **Class**: Drugs 1 to 3 are Class A, a bluish green; Drugs 4 to 7 are
-  Class B, an orange; Drugs 8 to 10 are Class C, a reddish purple; Drug
-  11 is in no class, a grey. The three colors are Okabe-Ito colors that
-  readers with color-vision deficiency can tell apart. Every figure uses
-  them.
-- **Direction**: a ROR below 1 is blue and a ROR above 1 is red, on a
-  ramp that passes through white at 1. No class is blue or red. Figures
-  3 and 4 use it.
+- **Class**: Drugs 1 to 3 are Class A, a deep teal; Drugs 4 to 7 are
+  Class B, a gold; Drugs 8 to 10 are Class C, an orchid; Drug 11 is in
+  no class, a grey. The four colors stay at least 16 apart (CIEDE2000)
+  with normal vision and with each kind of color-vision deficiency.
+  Every figure uses them.
+- **Direction**: a ROR below 1 is a steel blue and a ROR above 1 a brick
+  red, on a ramp that passes through white at 1. No class is blue or
+  red. Figures 3 and 4 use it.
 - **Evidence**: a filled circle when the 95% CI excludes 1, an open
   circle when it includes 1; in a heat map, bold numbers mean the same.
 - **Categories of events** have no color. There are eight of them, more
   than readers with color-vision deficiency can keep apart (see Section
   7), so they are the labels of the columns and are named in the text of
-  the figures. The routes of Figure 2 take the Okabe-Ito colors that
-  nothing else uses, and the ordered bins of time are greys.
+  the figures. Everything else is neutral: the three routes of Figure 2
+  are a blush, a dusty rose and a rosy taupe, and the ordered quantities
+  (the bins of time, the median days, the boxes of the flow chart) are
+  steps of one cool slate.
 
 A group keeps its color across the figures, and no figure gives one
 color two meanings.
@@ -79,11 +81,18 @@ color two meanings.
 ``` r
 library(patchwork)
 
-okabe_ito <- journal_colors("cell")   # orange, sky blue, bluish green, yellow, blue, vermillion, reddish purple, black
-
+# the colors are made with hcl() of base R, from a hue, a chroma and a lightness
 class_levels <- c("Class A", "Class B", "Class C", "No class")
-class_fill <- c(`Class A` = okabe_ito[3], `Class B` = okabe_ito[1], `Class C` = okabe_ito[7], `No class` = "grey60")
-direction <- c(low = okabe_ito[5], mid = "white", high = "firebrick")       # below 1 is blue, above 1 is red
+class_fill <- c(`Class A` = hcl(176, 46, 44), `Class B` = hcl(62, 82, 66), `Class C` = hcl(296, 54, 52), `No class` = grey(0.62))
+
+# a ramp from white to a deep end: the chroma grows and the lightness falls together
+from_white <- function(hue, chroma, lightness, n = 6) {
+  s <- seq(0, 1, length.out = n)^0.9
+  hcl(hue, chroma * s, 97 - (97 - lightness) * s)
+}
+direction <- c(rev(from_white(245, 54, 42)), from_white(14, 68, 44)[-1])     # blue below 1, white at 1, red above 1
+slate <- function(chroma, lightness) hcl(250, chroma, lightness)           # the cool neutral of ordered quantities
+ink <- grey(0.14)                                                             # text and frames inside the plots
 
 # one theme for every panel, and the sizes that the panels share
 figure_theme <- journal_theme("nature") +
@@ -193,8 +202,9 @@ boxes <- data.frame(
   note = c("files of the extract", "one record kept for each case", "Drugs 1 to 11", "Drugs 1 to 10", "not in a class"),
   stringsAsFactors = FALSE
 )
-boxes$fill <- c("grey25", "grey45", "grey82", "grey96", "grey96")
-boxes$ink <- c("white", "white", "grey10", "grey10", "grey10")
+boxes$fill <- c(slate(30, 24), slate(26, 40), slate(14, 80), slate(3, 97), slate(3, 97))
+boxes$edge <- c(NA, NA, NA, grey(0.82), grey(0.82))
+boxes$ink <- c("white", "white", ink, ink, ink)
 boxes$x <- (boxes$xmin + boxes$xmax) / 2
 boxes$y <- (boxes$ymin + boxes$ymax) / 2
 
@@ -213,16 +223,18 @@ notes <- data.frame(
 strips <- data.frame(xmin = c(6 + c(0, 14, 28), 60), xmax = c(6 + c(14, 28, 42), 86), ymin = 25.2, ymax = 27,
                      fill = unname(class_fill[c(1, 2, 3, 4)]))
 
+shadows <- transform(boxes, xmin = xmin + 0.6, xmax = xmax + 0.6, ymin = ymin - 0.6, ymax = ymax - 0.6)
 arrowhead <- arrow(length = unit(1.6, "mm"), type = "closed")
 flow <- ggplot() +
-  geom_segment(data = joint, aes(x = x, xend = xend, y = y, yend = yend), linewidth = 0.4, colour = "grey30") +
-  geom_segment(data = down, aes(x = x, xend = x, y = y, yend = yend), arrow = arrowhead, linewidth = 0.4, colour = "grey30") +
-  geom_rect(data = boxes, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill), colour = "grey35", linewidth = 0.3) +
+  geom_segment(data = joint, aes(x = x, xend = xend, y = y, yend = yend), linewidth = 0.4, colour = grey(0.35)) +
+  geom_segment(data = down, aes(x = x, xend = x, y = y, yend = yend), arrow = arrowhead, linewidth = 0.4, colour = grey(0.35)) +
+  geom_rect(data = shadows, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), fill = grey(0.4), alpha = 0.13, colour = NA) +
+  geom_rect(data = boxes, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill, colour = edge), linewidth = 0.3) +
   geom_rect(data = strips, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill)) +
   geom_text(data = boxes, aes(x = x, y = ymax - 2.5 - 1.4 * (ymax < 30), label = head, colour = ink), size = 6.5 / .pt, fontface = "bold") +
   geom_text(data = boxes, aes(x = x, y = y, label = big(n), colour = ink), size = 7 / .pt, fontface = "bold") +
   geom_text(data = boxes, aes(x = x, y = ymin + 2.3, label = note, colour = ink), size = 6 / .pt) +
-  geom_text(data = notes, aes(x = x, y = y, label = label), hjust = 0, size = small_text, colour = "grey20", lineheight = 0.95) +
+  geom_text(data = notes, aes(x = x, y = y, label = label), hjust = 0, size = small_text, colour = grey(0.3), lineheight = 0.95) +
   scale_fill_identity() + scale_colour_identity() +
   scale_x_continuous(limits = c(0, 100), expand = expansion(0)) + scale_y_continuous(limits = c(5, 100), expand = expansion(0)) +
   theme_void(base_size = 7) + tag_theme
@@ -230,17 +242,19 @@ flow <- ggplot() +
 tag_panels(flow, 1)
 ```
 
-<img src="reporting-study_files/figure-gfm/figure_1-1.png" alt="A flow chart of three boxes in dark to light grey, one below the other, joined by arrows with notes about what was removed at the right of each arrow. The last of them splits into two pale boxes, with a strip of three colors above the first and a grey strip above the second." width="66%" />
+<img src="reporting-study_files/figure-gfm/figure_1-1.png" alt="A flow chart of three boxes in dark to light slate blue, one below the other, joined by arrows with notes about what was removed at the right of each arrow. The last of them splits into two pale boxes, with a strip of three colors above the first and a grey strip above the second." width="66%" />
 
 _Figure 1. Flow of the cases into the analysis. The records of the
 extract, the unique cases, the analysis set of Drugs 1 to 11, and its
 two groups, with what is removed at each step written beside its arrow.
 The strips give the colors of the classes. All counts are simulated._
 
-- The first three boxes are three steps of grey, darkest first, and the
-  last two are pale. The only colors of the chart are the strips on top
-  of the last two: the colors of the three classes for the box that
-  holds them, the grey of “no class” for Drug 11.
+- The first three boxes are three steps of one cool slate, darkest
+  first, and the last two are pale. The only colors of the chart are the
+  strips on top of the last two: the colors of the three classes for the
+  box that holds them, the grey of “no class” for Drug 11. A pale
+  shadow, the same box moved a little and made transparent, lifts the
+  boxes off the page.
 - What is removed at each step is written beside its arrow, in a size
   that fits in the margin, and the number inside each box is the one
   that remains.
@@ -261,7 +275,7 @@ rows, so that a drug is read across the three.
 
 ``` r
 set.seed(21)
-route_colors <- c(`Route 1` = okabe_ito[2], `Route 2` = okabe_ito[4], `Route 3` = okabe_ito[8])
+route_colors <- setNames(hcl(20, c(10, 16, 30), c(93, 76, 62)), c("Route 1", "Route 2", "Route 3"))     # blush, dusty rose, rosy taupe
 bins <- c("\u226430 d", "31\u2013180 d", ">180 d")
 axis_drugs <- scale_y_discrete(limits = rev(drugs))
 
@@ -296,7 +310,7 @@ median_onset <- data.frame(drug = cells$drug, event = cells$event, days = round(
 
 panels_2 <- list(
   A = ggplot(cumulative, aes(year, total, group = drug, colour = group)) +
-    geom_line(linewidth = 0.45) +
+    geom_line(linewidth = 0.6, lineend = "round") +
     geom_text(data = ends, aes(x = max(years) + 0.25, y = 10^y, label = drug), hjust = 0, size = small_text, show.legend = FALSE) +
     scale_colour_manual(values = class_fill, name = NULL, drop = FALSE) +
     scale_x_continuous(breaks = seq(2012, 2024, 4), expand = expansion(add = c(0.3, 2.2))) +
@@ -313,26 +327,27 @@ panels_2 <- list(
     labs(x = "Reports (%)", y = NULL, title = "Route of administration") +
     figure_theme,
   C = ggplot(signal, aes(event, drug)) +
-    geom_tile(data = cells, aes(event, as.character(drug)), fill = "grey96", colour = NA, width = 0.94, height = 0.9, inherit.aes = FALSE) +
-    geom_point(aes(size = a, colour = group), alpha = 0.85, shape = 16, show.legend = c(size = TRUE, colour = FALSE)) +
+    geom_tile(data = cells, aes(event, as.character(drug)), fill = slate(4, 96), colour = NA, width = 0.94, height = 0.9, inherit.aes = FALSE) +
+    geom_point(aes(size = a, fill = group), shape = 21, colour = "white", stroke = 0.5, alpha = 0.95, show.legend = c(size = TRUE, fill = FALSE)) +
     geom_text(aes(label = format(a, big.mark = ",", trim = TRUE)), nudge_x = 0.5, hjust = 0, size = tile_text) +
     axis_drugs + scale_x_discrete(limits = events, labels = category_number, expand = expansion(add = c(0.5, 1))) +
-    scale_size_area(max_size = 5.2, breaks = c(100, 1000, 5000), labels = c("100", "1,000", "5,000"), name = "Reports") +
-    scale_colour_manual(values = class_fill, guide = "none") +
+    scale_size_area(max_size = 5.2, breaks = c(100, 1000, 5000), labels = c("100", "1,000", "5,000"), name = "Reports",
+                    guide = guide_legend(override.aes = list(fill = "grey35"))) +
+    scale_fill_manual(values = class_fill, guide = "none") +
     labs(x = "Category", y = NULL, title = "Cells with a signal") +
     figure_theme,
   D = ggplot(onset, aes(share, drug, fill = bin)) +
     geom_col(width = 0.78, colour = "white", linewidth = 0.2) +
     axis_drugs + scale_x_continuous(breaks = c(0, 0.5, 1), labels = c("0", "50", "100"), expand = expansion(0)) +
-    scale_fill_manual(values = setNames(grey(c(0.85, 0.6, 0.3)), bins), name = "Time to event") +
+    scale_fill_manual(values = setNames(slate(c(10, 24, 36), c(88, 64, 34)), bins), name = "Time to event") +
     labs(x = "Reports (%)", y = NULL, title = "Time to event") +
     figure_theme + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()),
   E = ggplot(median_onset, aes(event, drug, fill = days)) +
     geom_tile(colour = "white", linewidth = 0.3) +
     geom_text(aes(label = days, colour = days > 200), size = tile_text, show.legend = FALSE) +
     axis_drugs + scale_x_discrete(labels = category_number, expand = expansion(0)) +
-    scale_colour_manual(values = c(`TRUE` = "white", `FALSE` = "black")) +
-    scale_fill_gradient(low = "white", high = grey(0.3), name = "Median\ndays") +
+    scale_colour_manual(values = c(`TRUE` = "white", `FALSE` = ink)) +
+    scale_fill_gradientn(colours = slate(c(3, 14, 28, 38), c(98, 80, 52, 26)), name = "Median\ndays") +
     labs(x = "Category", y = NULL, title = "Median time to event") +
     figure_theme + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line = element_blank())
 )
@@ -340,7 +355,7 @@ tag_panels(wrap_plots(panels_2, design = design_rows(list(c(A = 20, B = 16), c(C
              plot_layout(guides = "collect"), 5)
 ```
 
-<img src="reporting-study_files/figure-gfm/figure_2-1.png" alt="A figure of five panels, a to e. Panel a has eleven rising lines on a logarithmic axis, colored by class, each labeled with its drug. Panel b has eleven horizontal bars in three colors. Panel c is a matrix of eleven rows and eight columns, with a few colored dots of different sizes and a number beside each. Panel d has eleven horizontal bars in three greys. Panel e is a grid of eleven rows and eight columns with a number in each tile, in shades of grey." width="100%" />
+<img src="reporting-study_files/figure-gfm/figure_2-1.png" alt="A figure of five panels, a to e. Panel a has eleven rising lines on a logarithmic axis, colored by class, each labeled with its drug. Panel b has eleven horizontal bars in three earth tones. Panel c is a matrix of eleven rows and eight columns, with a few colored dots of different sizes and a number beside each. Panel d has eleven horizontal bars in three shades of slate. Panel e is a grid of eleven rows and eight columns with a number in each tile, in shades of slate." width="100%" />
 
 _Figure 2. Reports, routes and time to the event for 11 drugs. a,
 Cumulative reports of each drug by year (logarithmic axis). b, Route of
@@ -424,10 +439,11 @@ panels_3 <- list(
     theme(strip.placement = "outside", strip.text.y.left = element_text(angle = 90)),
   B = ggplot(cells, aes(event_ordered, drug)) +
     geom_tile(aes(fill = log2(ror)), colour = "white", linewidth = 0.3) +
-    geom_text(aes(label = sprintf("%.1f", ror), fontface = ifelse(signal, "bold", "plain")), size = tile_text) +
-    geom_tile(data = top, fill = NA, colour = "black", linewidth = 0.5) +
+    geom_text(data = cells[abs(log2(cells$ror)) < 2.2, ], aes(label = sprintf("%.1f", ror), fontface = ifelse(signal, "bold", "plain")), size = tile_text, colour = ink) +
+    geom_text(data = cells[abs(log2(cells$ror)) >= 2.2, ], aes(label = sprintf("%.1f", ror), fontface = ifelse(signal, "bold", "plain")), size = tile_text, colour = "white") +
+    geom_tile(data = top, fill = NA, colour = ink, linewidth = 0.5) +
     by_class + scale_y_discrete(limits = rev) + scale_x_discrete(labels = category_number, expand = expansion(0)) +
-    scale_fill_gradient2(low = direction[["low"]], mid = "white", high = direction[["high"]], midpoint = 0, limits = c(-3, 3), oob = scales::squish,
+    scale_fill_gradientn(colours = direction, limits = c(-3, 3), oob = scales::squish,
                          labels = function(x) minus(format(x)), name = "log2 ROR") +
     labs(x = "Category", y = NULL) +
     figure_theme + strip_text + no_strip +
@@ -435,8 +451,8 @@ panels_3 <- list(
           axis.line = element_blank(), legend.position = "right", panel.spacing.y = unit(0.8, "mm")),
   C = ggplot(top, aes(ror, drug)) +
     geom_vline(xintercept = 1, linetype = "22", linewidth = 0.3, colour = "grey45") +
-    geom_linerange(aes(xmin = lo, xmax = hi, colour = group), orientation = "y", linewidth = 0.5) +
-    geom_point(aes(colour = group), size = 1.7) +
+    geom_linerange(aes(xmin = lo, xmax = hi, colour = group), orientation = "y", linewidth = 0.6, lineend = "round") +
+    geom_point(aes(colour = group), size = 2) +
     geom_text(aes(x = 40, label = label), hjust = 1, size = small_text, colour = "grey20") +
     scale_colour_manual(values = class_fill, guide = "none") +
     by_class + scale_y_discrete(limits = rev) +
@@ -507,11 +523,12 @@ rel$firm <- (rel$lo_ratio > 1 & rel$ratio >= 1.5) | (rel$hi_ratio < 1 & rel$rati
 
 contrast <- ggplot(rel, aes(event, drug)) +
   geom_tile(aes(fill = log2(ratio)), colour = "white", linewidth = 0.3) +
-  geom_text(aes(label = sprintf("%.1f", ratio), fontface = ifelse(firm, "bold", "plain")), size = tile_text) +
+  geom_text(data = rel[abs(log2(rel$ratio)) < 2.2, ], aes(label = sprintf("%.1f", ratio), fontface = ifelse(firm, "bold", "plain")), size = tile_text, colour = ink) +
+  geom_text(data = rel[abs(log2(rel$ratio)) >= 2.2, ], aes(label = sprintf("%.1f", ratio), fontface = ifelse(firm, "bold", "plain")), size = tile_text, colour = "white") +
   geom_point(aes(x = 0.05, colour = group), shape = 15, size = 3.4) +
   facet_grid(rows = vars(group), scales = "free_y", space = "free_y") +
   scale_y_discrete(limits = rev) + scale_x_discrete(position = "top", labels = category_number, expand = expansion(add = c(1.3, 0))) +
-  scale_fill_gradient2(low = direction[["low"]], mid = "white", high = direction[["high"]], midpoint = 0, limits = c(-3, 3), oob = scales::squish,
+  scale_fill_gradientn(colours = direction, limits = c(-3, 3), oob = scales::squish,
                        labels = function(x) minus(format(x)), name = "log2 ratio\nto Drug 1",
                        guide = guide_colourbar(order = 1, theme = theme(legend.key.height = unit(24, "mm"), legend.key.width = unit(2.4, "mm")))) +
   scale_colour_manual(values = class_fill, name = NULL, guide = guide_legend(order = 2, nrow = 1, override.aes = list(size = 2.6))) +
@@ -585,14 +602,14 @@ estimates$label <- sprintf("%.1f (%.1f\u2013%.1f)", estimates$ror, estimates$lo,
 
 forest <- ggplot(estimates, aes(ror, row)) +
   geom_vline(xintercept = 1, linetype = "22", linewidth = 0.3, colour = "grey45") +
-  geom_linerange(aes(xmin = lo, xmax = hi, colour = group), orientation = "y", linewidth = 0.5) +
-  geom_point(aes(colour = group, shape = excludes), size = 2, stroke = 0.6) +
+  geom_linerange(aes(xmin = lo, xmax = hi, colour = group), orientation = "y", linewidth = 0.6, lineend = "round") +
+  geom_point(aes(colour = group, shape = excludes), fill = "white", size = 2.3, stroke = 0.8) +
   geom_text(aes(x = 16, label = label), hjust = 1, size = small_text, colour = "grey20") +
   facet_grid(rows = vars(header), scales = "free_y", space = "free_y", switch = "y") +
   scale_y_discrete(labels = function(x) estimates$analysis[match(x, estimates$row)]) +
   scale_x_log10(limits = c(0.7, 16), breaks = c(1, 2, 5, 10), expand = expansion(0)) +
   scale_colour_manual(values = class_fill, guide = "none") +
-  scale_shape_manual(values = c(`TRUE` = 16, `FALSE` = 1), labels = c(`TRUE` = "95% CI excludes 1", `FALSE` = "95% CI includes 1"), name = NULL, drop = FALSE) +
+  scale_shape_manual(values = c(`TRUE` = 16, `FALSE` = 21), labels = c(`TRUE` = "95% CI excludes 1", `FALSE` = "95% CI includes 1"), name = NULL, drop = FALSE) +
   labs(x = "Reporting odds ratio (95% CI, log scale)", y = NULL) +
   figure_theme + strip_text +
   theme(strip.placement = "outside", strip.text.y.left = element_text(angle = 0, hjust = 1), panel.spacing.y = unit(1.5, "mm"),
@@ -636,10 +653,10 @@ figures <- list(
   "Figure 5" = list(A = forest)
 )
 journal_audit(figures, "nature", column = "double")
-#> Audit of 5 figure(s) for Nature: pass
+#> Audit of 5 figure(s) for Nature: warn
 #> figure    check         status  value            limit                    note
 #> Figure 1  journal       pass    all checks pass  Nature                   
-#> Figure 2  journal       pass    all checks pass  Nature                   
+#> Figure 2  colors        warn    6.6              >= 10 (CIEDE2000)        up to 6 colors; closest pair with tritan vision; a panel with a gradient or many colors is not compared; palette = "okabe_ito" is made for this
 #> Figure 3  journal       pass    all checks pass  Nature                   
 #> Figure 4  journal       pass    all checks pass  Nature                   
 #> Figure 5  journal       pass    all checks pass  Nature                   
@@ -661,14 +678,16 @@ A text size of 5 pt and `theme_void(base_size = 7)` are the repairs.
 
 Why the categories have no color: eight categories need eight colors,
 and the distance that the audit uses (CIEDE2000, with color-vision
-deficiency simulated) says that only the eight Okabe-Ito colors keep
-their closest pair 11 or more apart for every kind of vision. The
-qualitative palettes of `hcl.colors()` and several of `palette.colors()`
-have a closest pair of 4.3 or less for at least one kind. The Okabe-Ito
-colors are taken by the classes and the direction, and a color that
-means a class in one figure should not mean a category in the next, so
-the categories are named, in the columns of the heat map and in the text
-of the forest plot, and the audit has nothing to warn about.
+deficiency simulated) says that, of the qualitative palettes of base R
+that were tried (those of `hcl.colors()` and several of
+`palette.colors()`), only the eight colors of the palette of Okabe and
+Ito keep their closest pair 11 or more apart for every kind of vision;
+the others have a closest pair of 4.3 or less for at least one kind.
+Eight such colors would also compete with the three group colors and the
+two ends of the direction ramp, and a color that means a class in one
+figure should not mean a category in the next, so the categories are
+named, in the columns of the heat map and in the text of the forest
+plot, and the audit has nothing to warn about.
 
 What the audit cannot see: it reads the plots, not the picture. Text
 that sits on a line, labels that touch each other and text that crosses
@@ -688,8 +707,12 @@ them, and the last is in the theme of the set.
 
 The figures are drawn with ggplot2 and laid out with patchwork (Thomas
 Lin Pedersen), which `themeset` suggests, not requires. The tree comes
-from `hclust()` of base R. The class colors are Okabe-Ito colors, by
-Masataka Okabe and Kei Ito, as they are in base R.
+from `hclust()` of base R, and the colors from `hcl()` of base R, which
+builds a color from its hue, chroma and lightness: the three group
+colors were found by a search over those three numbers, for a large
+distance between them in CIEDE2000 with normal vision and with the three
+kinds of color-vision deficiency, and the gold was then deepened so that
+a thin line of it can be seen on white.
 
 ------------------------------------------------------------------------
 
