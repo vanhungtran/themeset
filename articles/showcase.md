@@ -4,6 +4,9 @@ A Showcase of Themes and Colors
 - [Twelve Theme Sets](#twelve-theme-sets)
 - [Palettes for Readers with Color-Vision
   Deficiency](#palettes-for-readers-with-color-vision-deficiency)
+- [One Figure, Twelve Palettes](#one-figure-twelve-palettes)
+  - [As Readers with Color-Vision Deficiency See
+    It](#as-readers-with-color-vision-deficiency-see-it)
 - [One Plot in Four Journals](#one-plot-in-four-journals)
 
 One plot of the simulated growth data, drawn with the theme sets, the
@@ -15,6 +18,7 @@ library(ggplot2)
 library(themeset)
 
 has_patchwork <- requireNamespace("patchwork", quietly = TRUE)
+has_colorspace <- requireNamespace("colorspace", quietly = TRUE)
 
 od <- subset(example_growth(), measure == "OD600")
 p <- ggplot(od, aes(time, value, color = strain)) +
@@ -114,6 +118,76 @@ Any of these palettes, by name:
 
 ``` r
 p + scale_color_set("okabe_ito")
+```
+
+## One Figure, Twelve Palettes
+
+The same figure, the growth curves with their error bars in the theme of
+Nature, with only the palette changed. The panels are sorted by the
+distance between the two closest of the six colors that the figure uses:
+the score depends on the number of groups, so a palette that ranks high
+for eight colors can rank lower for six, and the other way around.
+
+``` r
+fig <- ggplot(od, aes(time, value, color = strain)) +
+  geom_errorbar(aes(ymin = value - se, ymax = value + se), width = 1.5, linewidth = 0.4) +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 1.6) +
+  scale_x_continuous(breaks = seq(0, 60, 20)) +
+  labs(x = "Incubation time (hr)", y = "OD600", color = NULL) +
+  journal_theme("nature") +
+  theme(text = element_text(size = 10), axis.text = element_text(size = 8),
+        legend.text = element_text(size = 8), legend.key.size = unit(3, "mm"))
+
+six <- compare_palettes(palettes, n = 6)
+six <- six[order(-six$worst), ]
+
+swapped <- Map(function(set, score) {
+  fig + scale_color_set(set) +
+    labs(title = sprintf("%s   %.0f%s", set, score, if (score >= 10) "  safe" else "")) +
+    theme(plot.title = element_text(size = 11, face = "bold"))
+}, six$set, six$worst)
+patchwork::wrap_plots(swapped, ncol = 4)
+```
+
+<img src="showcase_files/figure-gfm/swap-1.png" alt="Twelve copies of the growth figure, each with a different palette, sorted from the easiest colors to tell apart to the hardest." width="100%" />
+
+### As Readers with Color-Vision Deficiency See It
+
+Three of the palettes, with normal vision and as simulated for
+deuteranopia, protanopia and tritanopia with the colorspace package.
+With d3 and npg some strains turn into the same olive or blue, and the
+reader can no longer match a line to the legend; Okabe-Ito keeps the six
+lines apart.
+
+``` r
+simulate <- list(
+  "normal vision" = identity,
+  deuteranopia = colorspace::deutan,
+  protanopia = colorspace::protan,
+  tritanopia = colorspace::tritan
+)
+seen <- list()
+for (set in c("okabe_ito", "npg", "d3")) {
+  colors <- unname(scale_color_set(set)$palette(6))[1:6]
+  for (vision in names(simulate)) {
+    seen[[length(seen) + 1]] <- fig +
+      scale_color_manual(values = simulate[[vision]](colors)) +
+      labs(title = paste0(set, ", ", vision)) +
+      theme(plot.title = element_text(size = 11, face = "bold"), legend.position = "none")
+  }
+}
+patchwork::wrap_plots(seen, ncol = 4)
+```
+
+<img src="showcase_files/figure-gfm/cvd-1.png" alt="The growth figure in the okabe_ito, npg and d3 palettes, each with normal vision and with simulated deuteranopia, protanopia and tritanopia." width="100%" />
+
+To score the palettes for the number of groups of your own figure, and
+to switch a figure to Okabe-Ito only when its colors are too close:
+
+``` r
+compare_palettes(c("jco", "okabe_ito", "npg", "d3"), n = 6)
+journal_fix(fig + scale_color_set("d3"), "nature", fix = "colors")
 ```
 
 ## One Plot in Four Journals
