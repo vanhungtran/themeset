@@ -1,3 +1,12 @@
+# themeset 1.8.2
+
+## Fixes
+
+* The set `economist_white` no longer calls `ggthemes::theme_economist_white()`
+  with ggthemes 7.0.0 or later, where it is deprecated and `theme_economist()`
+  draws the same white panel. Before, building the set gave a deprecation
+  warning with the new ggthemes.
+
 # themeset 1.8.1
 
 * A new article, "A Figure Set for a Reanalysis", draws seven figures from

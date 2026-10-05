@@ -83,10 +83,11 @@ test_that("elements hidden through a blank parent stay hidden", {
 })
 
 test_that("elements that a theme leaves unset become markdown too", {
-  # theme_economist() does not set plot.subtitle; it inherits from `title`
-  th <- md_theme_economist()
+  # a theme with no plot.subtitle: the element inherits from `title`
+  base <- ggplot2::theme_gray() %+replace% ggplot2::theme(plot.subtitle = NULL)
+  th <- as_md_theme(base)
 
-  expect_null(ggthemes::theme_economist()$plot.subtitle)
+  expect_null(base$plot.subtitle)
   expect_s3_class(th$plot.subtitle, "element_markdown")
 })
 

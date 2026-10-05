@@ -69,7 +69,14 @@ md_theme_base <- function(...) { as_md_theme(ggthemes::theme_base(...)) }
 md_theme_calc <- function(...) { as_md_theme(ggthemes::theme_calc(...)) }
 md_theme_clean <- function(...) { as_md_theme(ggthemes::theme_clean(...)) }
 md_theme_economist <- function(...) { as_md_theme(ggthemes::theme_economist(...)) }
-md_theme_economist_white <- function(...) { as_md_theme(ggthemes::theme_economist_white(...)) }
+# ggthemes 7.0.0 deprecated theme_economist_white(): theme_economist() draws the white panel itself
+md_theme_economist_white <- function(...) {
+  if (utils::packageVersion("ggthemes") >= "7.0.0") {
+    as_md_theme(ggthemes::theme_economist(...))
+  } else {
+    as_md_theme(ggthemes::theme_economist_white(...))
+  }
+}
 md_theme_excel <- function(...) { as_md_theme(ggthemes::theme_excel(...)) }
 md_theme_excel_new <- function(...) { as_md_theme(ggthemes::theme_excel_new(...)) }
 md_theme_few <- function(...) { as_md_theme(ggthemes::theme_few(...)) }
