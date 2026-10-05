@@ -1,3 +1,13 @@
+# themeset 1.8.8
+
+* The flow chart of "A Figure Set for a Reporting Study" is flat: rounded boxes, no
+  shadows, one line width for the outlines and the arrows, and small pills in the
+  class colors in place of the strips. ggplot2 has no rounded rectangle, so each box
+  is a polygon with a quarter of a circle at its corners, and `coord_fixed()` keeps
+  the corners round. The style follows the design rules of FigForge (hengzzzhou on
+  GitHub), a tool in which an AI model draws diagrams; none of its code or prompts
+  is used.
+
 # themeset 1.8.7
 
 * The seven figures of "A Figure Set for a Reanalysis" are checked as PDF files,

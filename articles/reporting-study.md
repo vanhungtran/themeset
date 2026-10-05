@@ -179,8 +179,8 @@ head(cells[cells$signal, c("drug", "event", "a", "ror", "lo", "hi")], 4)
 
 ## 2. Figure 1: The Flow of the Cases
 
-A flow chart is a plot with no axes: boxes are `geom_rect()`, their text
-is `geom_text()`, and the arrows are `geom_segment()` with an `arrow()`.
+A flow chart is a plot with no axes: boxes are polygons, their text is
+`geom_text()`, and the arrows are `geom_segment()` with an `arrow()`.
 Everything sits on a plane of 100 by 100, so that the position of a box
 is a number that can be read and changed. The counts are computed from
 the study, so that the chart agrees with the figures after it.
@@ -208,6 +208,24 @@ boxes$ink <- c("white", "white", ink, ink, ink)
 boxes$x <- (boxes$xmin + boxes$xmax) / 2
 boxes$y <- (boxes$ymin + boxes$ymax) / 2
 
+# ggplot2 has no rounded rectangle, so a box is a polygon: a quarter of a circle at each corner
+polygon_of <- function(xmin, xmax, ymin, ymax, radius, id, fill, edge) {
+  turn <- seq(0, pi / 2, length.out = 9)
+  corner <- function(cx, cy, from) cbind(cx + radius * cos(from + turn), cy + radius * sin(from + turn))
+  p <- rbind(corner(xmax - radius, ymax - radius, 0), corner(xmin + radius, ymax - radius, pi / 2),
+             corner(xmin + radius, ymin + radius, pi), corner(xmax - radius, ymin + radius, 3 * pi / 2))
+  data.frame(x = p[, 1], y = p[, 2], id = id, fill = fill, edge = edge)
+}
+shapes <- do.call(rbind, lapply(seq_len(nrow(boxes)), function(i)
+  with(boxes[i, ], polygon_of(xmin, xmax, ymin, ymax, 2, paste0("box", i), fill, edge))))
+
+# a small pill in the color of each class at the top of the two boxes of the classes
+pills <- data.frame(box = c(4, 4, 4, 5), place = c(1, 2, 3, 1), count = c(3, 3, 3, 1), fill = unname(class_fill))
+pills$xmin <- boxes$x[pills$box] - (pills$count * 5.6 + (pills$count - 1) * 0.8) / 2 + (pills$place - 1) * 6.4
+pills$ymax <- boxes$ymax[pills$box] - 0.9
+shapes <- rbind(shapes, do.call(rbind, lapply(seq_len(nrow(pills)), function(i)
+  with(pills[i, ], polygon_of(xmin, xmin + 5.6, ymax - 1.4, ymax, 0.7, paste0("pill", i), fill, NA)))))
+
 # the arrows: down the stack, and from the analysis set into its two groups
 trunk <- boxes$x[1]
 down <- data.frame(x = c(trunk, trunk, boxes$x[4], boxes$x[5]), y = c(boxes$ymin[1], boxes$ymin[2], 33, 33),
@@ -219,42 +237,40 @@ notes <- data.frame(
             sprintf("%s cases without these drugs\n%s with an excluded route", big(n_nodrug), big(n_local)))
 )
 
-# a strip of the class colors above the first group, and a grey one above the second
-strips <- data.frame(xmin = c(6 + c(0, 14, 28), 60), xmax = c(6 + c(14, 28, 42), 86), ymin = 25.2, ymax = 27,
-                     fill = unname(class_fill[c(1, 2, 3, 4)]))
-
-shadows <- transform(boxes, xmin = xmin + 0.6, xmax = xmax + 0.6, ymin = ymin - 0.6, ymax = ymax - 0.6)
+thin <- 0.35                                             # one line width for the outlines and the arrows
 arrowhead <- arrow(length = unit(1.6, "mm"), type = "closed")
 flow <- ggplot() +
-  geom_segment(data = joint, aes(x = x, xend = xend, y = y, yend = yend), linewidth = 0.4, colour = grey(0.35)) +
-  geom_segment(data = down, aes(x = x, xend = x, y = y, yend = yend), arrow = arrowhead, linewidth = 0.4, colour = grey(0.35)) +
-  geom_rect(data = shadows, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), fill = grey(0.4), alpha = 0.13, colour = NA) +
-  geom_rect(data = boxes, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill, colour = edge), linewidth = 0.3) +
-  geom_rect(data = strips, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill)) +
+  geom_segment(data = joint, aes(x = x, xend = xend, y = y, yend = yend), linewidth = thin, colour = grey(0.35)) +
+  geom_segment(data = down, aes(x = x, xend = x, y = y, yend = yend), arrow = arrowhead, linewidth = thin, colour = grey(0.35)) +
+  geom_polygon(data = shapes, aes(x = x, y = y, group = id, fill = fill, colour = edge), linewidth = thin) +
   geom_text(data = boxes, aes(x = x, y = ymax - 2.5 - 1.4 * (ymax < 30), label = head, colour = ink), size = 6.5 / .pt, fontface = "bold") +
   geom_text(data = boxes, aes(x = x, y = y, label = big(n), colour = ink), size = 7 / .pt, fontface = "bold") +
   geom_text(data = boxes, aes(x = x, y = ymin + 2.3, label = note, colour = ink), size = 6 / .pt) +
   geom_text(data = notes, aes(x = x, y = y, label = label), hjust = 0, size = small_text, colour = grey(0.3), lineheight = 0.95) +
   scale_fill_identity() + scale_colour_identity() +
-  scale_x_continuous(limits = c(0, 100), expand = expansion(0)) + scale_y_continuous(limits = c(5, 100), expand = expansion(0)) +
+  coord_fixed(xlim = c(0, 100), ylim = c(5, 100), expand = FALSE) +
   theme_void(base_size = 7) + tag_theme
 
 tag_panels(flow, 1)
 ```
 
-<img src="reporting-study_files/figure-gfm/figure_1-1.png" alt="A flow chart of three boxes in dark to light slate blue, one below the other, joined by arrows with notes about what was removed at the right of each arrow. The last of them splits into two pale boxes, with a strip of three colors above the first and a grey strip above the second." width="66%" />
+<img src="reporting-study_files/figure-gfm/figure_1-1.png" alt="A flow chart of three boxes in dark to light slate blue, one below the other, joined by arrows with notes about what was removed at the right of each arrow. The last of them splits into two pale boxes, with three small colored pills at the top of the first and a grey pill at the top of the second. All the boxes have rounded corners." width="66%" />
 
 _Figure 1. Flow of the cases into the analysis. The records of the
 extract, the unique cases, the analysis set of Drugs 1 to 11, and its
 two groups, with what is removed at each step written beside its arrow.
-The strips give the colors of the classes. All counts are simulated._
+The pills give the colors of the classes. All counts are simulated._
 
 - The first three boxes are three steps of one cool slate, darkest
   first, and the last two are pale. The only colors of the chart are the
-  strips on top of the last two: the colors of the three classes for the
-  box that holds them, the grey of “no class” for Drug 11. A pale
-  shadow, the same box moved a little and made transparent, lifts the
-  boxes off the page.
+  small pills at the top of the last two: the colors of the three
+  classes for the box that holds them, the grey of “no class” for Drug
+  11.
+- The style is flat: no shadow, rounded boxes, and one line width
+  (`thin`) for the outlines and the arrows. ggplot2 has no rounded
+  rectangle, so `polygon_of()` draws one as a polygon with a quarter of
+  a circle at each corner, and `coord_fixed()` keeps a unit of x and a
+  unit of y equal on the page, so that the corners stay round.
 - What is removed at each step is written beside its arrow, in a size
   that fits in the margin, and the number inside each box is the one
   that remains.
@@ -708,13 +724,16 @@ them, and the last is in the theme of the set.
 ## 8. Packages and Credits
 
 The figures are drawn with ggplot2 and laid out with patchwork (Thomas
-Lin Pedersen), which `themeset` suggests, not requires. The tree comes
-from `hclust()` of base R, and the colors from `hcl()` of base R, which
-builds a color from its hue, chroma and lightness: the three group
-colors were found by a search over those three numbers, for a large
-distance between them in CIEDE2000 with normal vision and with the three
-kinds of color-vision deficiency, and the gold was then deepened so that
-a thin line of it can be seen on white.
+Lin Pedersen), which `themeset` suggests, not requires. The flat style
+of the flow chart, with rounded boxes, thin lines and short labels,
+follows the design rules of FigForge (hengzzzhou on GitHub), a tool in
+which an AI model draws diagrams; none of its code or prompts is used.
+The tree comes from `hclust()` of base R, and the colors from `hcl()` of
+base R, which builds a color from its hue, chroma and lightness: the
+three group colors were found by a search over those three numbers, for
+a large distance between them in CIEDE2000 with normal vision and with
+the three kinds of color-vision deficiency, and the gold was then
+deepened so that a thin line of it can be seen on white.
 
 ------------------------------------------------------------------------
 
